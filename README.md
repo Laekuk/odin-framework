@@ -13,4 +13,4 @@ The goal is to have a tiny footprint with no server modifications.
 </ol>
 
 <h2>Example</h2>
-<strong>$odin</strong>->array->overwrite_merge_recursive();
+<strong>$odin</strong>->array->overwrite_merge_recursive($arrayA,$arrayB);
