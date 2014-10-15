@@ -3,9 +3,9 @@
 $conf	= (object)array(
 	"default_conn"	=> "local_mysql",
 	"connections"	=> array(
-		"generic_mysql"		=> array(
+		"generic_local_mysql"		=> array(
 			"type"				=> "mysql",
-			"params"			=> array("host"=>"108.61.62.67","dbname"=>"mead_db"),
+			"params"			=> array("host"=>"localhost","dbname"=>"database"),
 			"user"				=> "user",
 			"pass"				=> "password",
 		),
