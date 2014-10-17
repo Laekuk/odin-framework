@@ -3,9 +3,13 @@
 class bolt_array
 {
 /*
-	recusively overwrite an array. It works exactly like array_merge_recursive(), except that when
+	Recusively overwrite an array. It works exactly like array_merge_recursive(), except that when
 	it encounters duplicate keys, it overwrites instead of preserving both values & destroying their key.
 */
+	var $overwrite_merge_recursive_opts	= NULL;
+	#
+	function set_overwrite_merge_recursive_opts($opts)
+		{ $this->overwrite_merge_recursive_opts	= $opts; }
 	function overwrite_merge_recursive()
 	{
 		if(func_num_args() < 2)
@@ -27,16 +31,22 @@ class bolt_array
 				return;
 			}
 			if (!$array)
-				continue;
+				{ continue; }
 			foreach($array as $key => $value)
-				if (is_string($key))
+			{
+				if(is_string($key) || isset($this->overwrite_merge_recursive_opts["preserve_keys"]))
+				{
 					if (is_array($value) && array_key_exists($key, $merged) && is_array($merged[$key]))
 						{ $merged[$key] = call_user_func_array(array($this,__FUNCTION__), array($merged[$key], $value)); }
 					else
 						{ $merged[$key] = $value; }
-					else
-						{ $merged[] = $value; }
+				}
+				else
+					{ $merged[] = $value; }
+			}
 		}
+		#reset options
+		$this->overwrite_merge_recursive_opts	= NULL;
 		return $merged;
 	}
 }
