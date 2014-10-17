@@ -28,7 +28,7 @@
 			),
 		);
 		if($opts)
-			{ $o	= $odin->array->overwrite_merge_recursive($o,$opts); }
+			{ $o	= $odin->array->ow_merge_r($o,$opts); }
 		#if fields were not passed, dynamically get the fields from the database with their defaults & data-types
 		if(!$fields)
 		{
