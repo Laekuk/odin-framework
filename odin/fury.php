@@ -1,5 +1,5 @@
 <?php
-#11OCT2014;AaronPeloquin;Odin-Framework
+#CreatedBy;Aaron;11OCT2014;Odin-Framework
 
 #kick on all errors.
 ini_set('display_errors', 'On');
