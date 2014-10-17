@@ -1,5 +1,5 @@
 <?php
-#AaronPeloquin;13OCT2014;Odin-Framework
+#CreatedBy;Aaron;13OCT2014;Odin-Framework
 class bolt_qdb
 {
 	function insert($table,$data,$skip_colin_prefix=FALSE)
