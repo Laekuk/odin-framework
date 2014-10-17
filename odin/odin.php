@@ -1,5 +1,5 @@
 <?php
-#11OCT2014;AaronPeloquin;Odin-Framework
+#CreatedBy;Aaron;11OCT2014;Odin-Framework
 class odin{
 	/*
 		Odin is a new PHP Framework which is a hybrid between functional & object oriented programming.
