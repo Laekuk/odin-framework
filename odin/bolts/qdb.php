@@ -1,5 +1,8 @@
 <?php
 #CreatedBy;Aaron;13OCT2014;Odin-Framework
+
+//!Quick Note
+#None of this code has been tested, since the SQL server I use is down right now, and I'm too lazy to setup a local one right now.
 class bolt_qdb
 {
 	function insert($table,$data,$skip_colin_prefix=FALSE)
