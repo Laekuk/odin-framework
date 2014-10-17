@@ -32,8 +32,8 @@ class bolt_curl
 */		);
 		if($opts)
 		{
-			$odin->array->set_overwrite_merge_recursive_opts(array("preserve_keys"=>1));
-			$o	= $odin->array->overwrite_merge_recursive($o,$opts);
+			$odin->array->set_ow_merge_r_opts(array("preserve_keys"=>1));
+			$o	= $odin->array->ow_merge_r($o,$opts);
 		}
 		#Pull out any special return commands, if they were sent
 		if(isset($o["return_all"]))
