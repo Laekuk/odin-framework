@@ -1,8 +1,5 @@
 <?php
 #CreatedBy;Aaron;11OCT2014;Odin-Framework
-/* 
-	Tonight, add in $flip_label functionality
-*/
  class bolt_form
 {
 	var $num_instances	= 0;
@@ -113,7 +110,7 @@
 			$type		= (isset($o["types"][$name])?$o["types"][$name]:"text");
 			#re/set this flag that says if this is one or many fields we're working with for this one "input".
 			$multifields= FALSE;
-			$flip_label	= FALSE;
+			$label_last	= FALSE;
 			switch($type)
 			{
 				#catch-all for any field-types.
@@ -183,13 +180,12 @@
 					else
 					{
 						#This checkbox (or radio) only has one option
-
+						$label_last		= TRUE;
 						#Create a single input field
 						$input	= $dom->createElement("input");
 						#If there is any default at all, check this field on.
 						if(!empty($default))
 						{
-							$flip_label		= TRUE;
 							$checked		= $dom->createAttribute("checked");
 							$checked->value	= "checked";
 							$input->appendChild($checked);
@@ -225,10 +221,21 @@
 				}
 				#create a span with the field's name in it and add that into the label tag.
 				$name_span	= $dom->createElement("span",$name);
-				$label->appendChild($name_span);
-				#add the input to the label
-				$label->appendChild($input);
-				#add the label to the element
+				if($label_last)
+				{
+					#add the input to the label
+					$label->appendChild($input);
+					#add the name-span to the label.
+					$label->appendChild($name_span);
+				}
+				else
+				{
+					#add the name-span to the label.
+					$label->appendChild($name_span);
+					#add the input to the label
+					$label->appendChild($input);
+
+				}
 				$element->appendChild($label);
 				$wrapper->appendChild($element);
 			}
@@ -240,8 +247,17 @@
 				Just stick it straight in!!
 */
 				$name_span	= $dom->createElement("span",$name);
-				$element->appendChild($name_span);
-				$element->appendChild($input);
+				if($label_last)
+				{
+					$element->appendChild($input);
+					$element->appendChild($name_span);
+				}
+				else
+				{
+					$element->appendChild($name_span);
+					$element->appendChild($input);
+
+				}
 				$wrapper->appendChild($element);
 			}
 		}
