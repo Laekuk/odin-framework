@@ -1,5 +1,5 @@
 <?php
-#AaronPeloquin;11OCT2014;Odin-Framework
+#CreatedBy;Aaron;11OCT2014;Odin-Framework
 /*
 	This is an example framework you can modify and call to learn how it works without messing with any actual "bolts"
 	To call it simply run these two lines of code from anywhere on your website:
