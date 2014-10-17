@@ -61,7 +61,7 @@ class bolt_qdb
 			"limit"	=> NULL,
 		);
 		if($opts)
-			{ $o	= $odin->array->overwrite_merge_recursive($do,$o); }
+			{ $o	= $odin->array->overwrite_merge_recursive($o,$opts); }
 		$sql	= "SELECT * FROM ?";
 		$tbl	= array($table);
 		if($o["key"])
