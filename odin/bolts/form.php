@@ -1,5 +1,5 @@
 <?php
-#AaronPeloquin;11OCT2014;Odin-Framework
+#CreatedBy;Aaron;11OCT2014;Odin-Framework
 /* 
 	Tonight, add in $flip_label functionality
 */
