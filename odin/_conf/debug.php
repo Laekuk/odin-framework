@@ -12,5 +12,5 @@ $conf	= (object)array(
 		Once turned on, it will show the debug_backtrace() of your errors, which (in my opinion) should be kept as developer-only information for security.
 */	"force_error"		=> FALSE,
 	#how many levels deep should we go on the debug_backtrace() print out? Set to 0 for infinate. Defaulted to 3, since normally I don't personally need more than 2.
-	"backtrace_levels"	=> 1,
+	"backtrace_levels"	=> 3,
 );
