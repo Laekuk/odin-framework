@@ -15,17 +15,5 @@ $conf	= (object)array(
 			"user"				=> "username",
 			"pass"				=> "password",
 		),
-		"local_mysql"		=> array(
-			"type"				=> "mysql",
-			"params"			=> array("host"=>"127.0.0.1","dbname"=>"information_schema"),
-			"user"				=> "",
-			"pass"				=> "",
-		),
-		"local_mysql_root"	=> array(
-			"type"				=> "mysql",
-			"params"			=> array("host"=>"127.0.0.1","dbname"=>"test"),
-			"user"				=> "",
-			"pass"				=> "",
-		),
 	),
 );
