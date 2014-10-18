@@ -7,7 +7,9 @@ class bolt_sql
 	function __construct($conf)
 	{
 		$this->conn_info	= $conf->connections;
-		$this->connect($conf->default_conn);
+		#if there is a default connection, autoconnect.
+		if($conf->default_conn)
+			{ $this->connect($conf->default_conn); }
 	}
 
 	function connect($conn_name)
