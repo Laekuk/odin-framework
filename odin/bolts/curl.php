@@ -13,7 +13,9 @@ class bolt_curl
 	{
 		global $odin;
 		$o	= array(
+#			Notice! Even setting these first 2 settings to FALSE will technically turn them on.
 #			"return_all"			=> 1,			#pass this if you want to return ALL THE DATA. see below for more options
+#			"debug_failure"			=> 1,			#pass this if you want to call the debug class on failure.
 
 			# For all possible options, see http://php.net/manual/en/function.curl-setopt.php
 #			CURLOPT_USERPWD			=> 0,			# Do you need to send a userpwd? (most often often used in API authentication)
@@ -30,6 +32,7 @@ class bolt_curl
 				It should look like what a $_GET looks like when in the URL. Also, don't forget to to urlencode()
 					eg: "test=1&debug=off&id=5"
 */		);
+		#merge the passed options with the defaults.
 		if($opts)
 		{
 			$odin->array->set_ow_merge_r_opts(array("preserve_keys"=>1));
@@ -38,8 +41,13 @@ class bolt_curl
 		#Pull out any special return commands, if they were sent
 		if(isset($o["return_all"]))
 		{
-			$return_all	= 1;
+			$return_all		= TRUE;
 			unset($o["return_all"]);
+		}
+		if(isset($o["debug_failure"]))
+		{
+			$debug_failure	= TRUE;
+			unset($o["debug_failure"]);
 		}
 		#initalize the curl request object.
 	    $req = curl_init($url);
@@ -51,7 +59,11 @@ class bolt_curl
 		$error 		= curl_error($req);
 		#store error locally, if there was one.
 		if(!empty($error))
-			{ $this->err	= $error; }
+		{
+			$this->err	= $error;
+			if(isset($debug_failure))
+				{ $odin->debug->error($error); }
+		}
 		if(isset($return_all))
 		{
 			$response	= array(
