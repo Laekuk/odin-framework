@@ -50,6 +50,9 @@ class bolt_sql
 		#if there was a database connection error, do not attempt any queries.
 		if(isset($this->conn_err[$this->cur_conn]))
 			{ return FALSE; }
+		#Default $prepared statement boolean to be false.
+		$prepared	= FALSE;
+
 		#parse the sql statement and get its type.
 		$sql		= ltrim($sql);
 		$qry_type	= preg_split("/[\s]+/",$sql,2)[0];
@@ -60,22 +63,17 @@ class bolt_sql
 		$c->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		#if there are params, run this as a prepared statement, otherwise run as a normal query-string.
-		if(!empty($params))
-		{
-			$r	= $c->prepare($sql);
-			$r->execute($params);
-		}
-		else
-			{ $r	= $c->query($sql); }
+		$r	= $c->prepare($sql);
+		$e	= $r->execute($params);
 		#if $r fails, return sql error
-		if(!$r)
+		if(!$e)
 			{ die("SQL Error!"); }
 		switch($qry_type)
 		{
 			case "SELECT":
 			case "VIEW":
 				if(!$key)
-					{ $ret	= $r->fetchAll(); }
+					{ var_dump($e);$ret	= $r->fetchAll();var_dump($ret); }
 				else
 				{
 					$ret	= NULL;
