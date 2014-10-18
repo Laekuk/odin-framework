@@ -50,7 +50,7 @@ class bolt_debug
 					"class"		=> $request["class"],
 					"method"	=> $request["function"],
 					"line"		=> $request["line"],
-#					"args"		=> $request["args"],
+					"args"		=> $request["args"],
 				);
 			}
 			var_dump($new_backtrace);
