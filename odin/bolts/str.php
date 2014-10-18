@@ -1,4 +1,4 @@
-<?
+<?php
 #CreatedBy;Weston;17OCT2014;Odin-Framework
 class bolt_str
 {
