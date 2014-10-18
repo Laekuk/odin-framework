@@ -32,11 +32,25 @@ class bolt_sql
 			{ $host_params	= implode(';',array_map(function($v,$k){return sprintf("%s=%s",$k,$v);},$info["params"],array_keys($info["params"]))); }
 		#connect to the database
 		$conn_str					= $info["type"].(empty($host_params)?FALSE:":".$host_params);
-		$this->conns[$conn_name]	= new PDO($conn_str,$info["user"],$info["pass"]);
+		try
+		{
+			$this->conns[$conn_name]	= new PDO($conn_str,$info["user"],$info["pass"]);
+			return TRUE;
+		}
+		catch(PDOException $e)
+		{
+			global $odin;
+			$this->conn_err[$conn_name]	= $e;
+			return $odin->debug->error($e);
+		}
 	}
 
 	function qry($sql,$params=array(),$key=FALSE)
 	{
+		#if there was a database connection error, do not attempt any queries.
+		if(isset($this->conn_err[$this->cur_conn]))
+			{ return FALSE; }
+		#parse the sql statement and get its type.
 		$sql		= ltrim($sql);
 		$qry_type	= preg_split("/[\s]+/",$sql,2)[0];
 
@@ -45,7 +59,7 @@ class bolt_sql
 		#enable php errors.
 		$c->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-		#
+		#if there are params, run this as a prepared statement, otherwise run as a normal query-string.
 		if(!empty($params))
 		{
 			$r	= $c->prepare($sql);
