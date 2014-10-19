@@ -1,7 +1,7 @@
 <?php
 #CreatedBy;Aaron;13OCT2014;Odin-Framework
 
-#This bolt is intended to give you a quick interface of the sql bolt (a wrapper for the PDO class).
+#qdb (quick database interface) is intended to give you a quick interface for interacting with the sql bolt (which is itself a wrapper for the PDO class).. so this is a wrapper of a warpper.
 class bolt_qdb
 {
 	function insert($table,$data,$skip_colin_prefix=FALSE)
@@ -14,6 +14,8 @@ class bolt_qdb
 		#loop through each field & sort it into its proper place, while at the same time reformatting the array.
 		foreach($data as $k=>$v)
 		{
+			#simple cleanse for possible injection attack.
+			$k	= $odin->str->alpha_num($k);
 			if(!$skip_colin_prefix)
 			{
 				unset($data[$k]);
@@ -39,6 +41,7 @@ class bolt_qdb
 		#loop through each field & sort it into its proper place, while at the same time reformatting the array.
 		foreach($data as $k=>$v)
 		{
+			$k	= $odin->str->alpha_num($k);
 			unset($data[$k]);
 			$data[":".$k]	= $v;
 			if($k==$key)
@@ -53,7 +56,6 @@ class bolt_qdb
 		{
 			$sql			= "SELECT * FROM `$table`".$where;
 			$update_check	= $odin->sql->qry($sql,array(":$key"=>$data[":$key"]),NULL,array("return"=>"num_rows"));
-var_dump($update_check);
 			if($update_check<1)
 				{ return $this->insert($table,$data,TRUE); }
 		}
