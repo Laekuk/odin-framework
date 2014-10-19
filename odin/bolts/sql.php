@@ -49,11 +49,10 @@ class bolt_sql
 	{
 		global $odin;
 		$o	= array(
-			"return"	=> TRUE,#"num_rows","qry_obj"
+			"return"	=> TRUE,#TRUE will always match the first case in a swtich, which is default. Options for this are: "default","num_rows","qry_obj"
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
-	
 		#if there was a database connection error, do not attempt any queries.
 		if(isset($this->conn_err[$this->cur_conn]))
 			{ return FALSE; }
@@ -84,10 +83,11 @@ class bolt_sql
 			$odin->debug->error($this->err);
 			return FALSE;
 		}
+
 		switch($o["return"])
 		{
-			default:	#catch-all so this just always works
-			case TRUE:	#Return normal, default way.
+			default:		#catch-all so this just always works
+			case "default":	#Return normal, default way.
 				switch($qry_type)
 				{
 					case "SELECT":
@@ -113,9 +113,12 @@ class bolt_sql
 						{ $ret	= TRUE; }
 				}
 			break;
+
 			case "qry_obj":
+				echo"RETYPE IS:";var_dump($o["return"]);echo "<hr />";
 				return $r;
 			break;
+
 			case "num_rows":
 				$ret	= $r->rowCount();
 			break;
