@@ -28,6 +28,7 @@ class bolt_qdb
 		#run the query
 		return $odin->sql->qry($insert,$data);
 	}
+
 	function update($table,$data,$key,$attempt_insert=NULL)
 	{
 		#write & run insert SQL query
