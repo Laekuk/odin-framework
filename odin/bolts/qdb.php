@@ -53,8 +53,8 @@ class bolt_qdb
 		if($attempt_insert)
 		{
 			$sql			= "SELECT * FROM `$table`".$where;
-			$update_check	= $odin->sql->qry($sql,array(":$key"=>$data[":$key"]));
-			if(empty($update_check))
+			$update_check	= (int)$odin->sql->qry($sql,array(":$key"=>$data[":$key"]),NULL,array("return"=>"num_rows"));
+			if($update_check<1)
 				{ return $this->insert($table,$data,TRUE); }
 		}
 		#trim the trailing coma, then add the where condition & return whatever the query gives us.
