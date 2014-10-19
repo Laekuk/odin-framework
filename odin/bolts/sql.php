@@ -64,7 +64,7 @@ class bolt_sql
 
 		#if there are params, run this as a prepared statement, otherwise run as a normal query-string.
 		$r	= $c->prepare($sql);
-		$e	= $r->execute($params);
+		$e	= $r->execute((is_array($params)?$params:NULL));
 		#if $r fails, return sql error
 		if(!$e)
 			{ die("SQL Error!"); }
