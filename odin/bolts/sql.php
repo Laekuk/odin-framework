@@ -45,8 +45,14 @@ class bolt_sql
 		}
 	}
 
-	function qry($sql,$params=array(),$key=FALSE)
+	function qry($sql,$params=array(),$key=FALSE,$opts=NULL)
 	{
+		$o	= array(
+			"return"	=> TRUE,#"num_rows","qry_obj"
+		);
+		if($opts)
+			{ $o	= $odin->array->ow_merge_r($o,$opts); }
+	
 		#if there was a database connection error, do not attempt any queries.
 		if(isset($this->conn_err[$this->cur_conn]))
 			{ return FALSE; }
@@ -67,30 +73,51 @@ class bolt_sql
 		$e	= $r->execute((is_array($params)?$params:NULL));
 		#if $r fails, return sql error
 		if(!$e)
-			{ die("SQL Error!"); }
-		switch($qry_type)
 		{
-			case "SELECT":
-			case "VIEW":
-				if(!$key)
-					{ $ret	= $r->fetchAll(); }
-				else
+			$this->err	= array(
+				"statement"		=> $sql,
+				"parameters"	=> $params,
+				"error"			=> $r->errorInfo(),
+			);
+			#run debug to give developer information if needed.
+			$odin->debug->error($this->err);
+			return FALSE;
+		}
+		switch($o["return"])
+		{
+			default:	#catch-all so this just always works
+			case TRUE:	#Return normal, default way.
+				switch($qry_type)
 				{
-					$ret	= NULL;
-					for($i=0;$i<=$r->rowCount();$i++)
-					{
-						$row	= $r->fetch();
-						$ret[$row[$key]]	= $row;
-					}
+					case "SELECT":
+					case "VIEW":
+						if(!$key)
+							{ $ret	= $r->fetchAll(); }
+						else
+						{
+							$ret	= NULL;
+							for($i=0;$i<=$r->rowCount();$i++)
+							{
+								$row	= $r->fetch();
+								$ret[$row[$key]]	= $row;
+							}
+						}
+					break;
+				}
+				#catch blank values.
+				if(empty($ret))
+				{
+					$ret	= $r->rowCount();
+					if($ret===0)
+						{ $ret	= TRUE; }
 				}
 			break;
-		}
-		#catch blank values.
-		if(empty($ret))
-		{
-			$ret	= $r->rowCount();
-			if($ret===0)
-				{ $ret	= TRUE; }
+			case "qry_obj":
+				return $r;
+			break;
+			case "num_rows":
+				$ret	= $r->rowCount();
+			break;
 		}
 		return $ret;
 	}
