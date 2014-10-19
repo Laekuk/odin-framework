@@ -73,7 +73,7 @@ class bolt_sql
 			case "SELECT":
 			case "VIEW":
 				if(!$key)
-					{ var_dump($e);$ret	= $r->fetchAll();var_dump($ret); }
+					{ $ret	= $r->fetchAll(); }
 				else
 				{
 					$ret	= NULL;
