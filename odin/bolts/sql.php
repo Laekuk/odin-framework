@@ -32,6 +32,7 @@ class bolt_sql
 			{ $host_params	= implode(';',array_map(function($v,$k){return sprintf("%s=%s",$k,$v);},$info["params"],array_keys($info["params"]))); }
 		#connect to the database
 		$conn_str					= $info["type"].(empty($host_params)?FALSE:":".$host_params);
+		#try to connect, otherwise error.
 		try
 		{
 			$this->conns[$conn_name]	= new PDO($conn_str,$info["user"],$info["pass"]);
@@ -48,9 +49,11 @@ class bolt_sql
 	function qry($sql,$params=array(),$key=FALSE,$opts=NULL)
 	{
 		global $odin;
+		#default options for this query.
 		$o	= array(
 			"return"	=> TRUE,#TRUE will always match the first case in a swtich, which is default. Options for this are: "default","num_rows","qry_obj"
 		);
+		#if they exist, merge the passed options with the defaults.
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
 		#if there was a database connection error, do not attempt any queries.
@@ -84,6 +87,7 @@ class bolt_sql
 			return FALSE;
 		}
 
+		#check options to see how we want to return this data
 		switch($o["return"])
 		{
 			default:		#catch-all so this just always works
@@ -97,7 +101,7 @@ class bolt_sql
 						else
 						{
 							$ret	= NULL;
-							for($i=0;$i<=$r->rowCount();$i++)
+							for($i=0;$i<$r->rowCount();$i++)
 							{
 								$row	= $r->fetch();
 								$ret[$row[$key]]	= $row;
@@ -114,11 +118,12 @@ class bolt_sql
 				}
 			break;
 
+			#return the query object
 			case "qry_obj":
-				echo"RETYPE IS:";var_dump($o["return"]);echo "<hr />";
 				return $r;
 			break;
 
+			#return a count of the # of rows found (or affected) by this statement.
 			case "num_rows":
 				$ret	= $r->rowCount();
 			break;
