@@ -20,5 +20,4 @@ This framework is intended to run on an Apache server (for now) in PHP v5.6
 <h2>Example</h2>
 <strong>$odin</strong>->array->overwrite_merge_recursive($arrayA,$arrayB);
 
-<h2>Plans</h2>
-<iframe src="https://docs.google.com/document/d/1LTTfS3iGPjMAc4AlVSuWEC7eVXkOqDE_a141x14AMhg/pub?embedded=true"></iframe>
+<h2><a href="https://docs.google.com/document/d/1LTTfS3iGPjMAc4AlVSuWEC7eVXkOqDE_a141x14AMhg/pub">Future Plans</a></h2>
