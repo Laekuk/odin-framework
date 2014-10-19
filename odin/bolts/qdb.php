@@ -11,7 +11,7 @@ class bolt_qdb
 		#build up the prepared update statement
 		$insert	= "INSERT INTO `$table` ";
 		$fields	= "(";
-		$values	= "(";
+		$values	= " VALUES(";
 		#loop through each field & sort it into its proper place, while at the same time reformatting the array.
 		foreach($data as $k=>$v)
 		{
