@@ -1,8 +1,7 @@
 <?php
 #CreatedBy;Aaron;13OCT2014;Odin-Framework
 
-//!Quick Note
-#None of this code has been tested, since the SQL server I use is down right now, and I'm too lazy to setup a local one right now.
+#This bolt is intended to give you a quick interface of the sql bolt (a wrapper for the PDO class).
 class bolt_qdb
 {
 	function insert($table,$data,$skip_colin_prefix=FALSE)
@@ -53,7 +52,8 @@ class bolt_qdb
 		if($attempt_insert)
 		{
 			$sql			= "SELECT * FROM `$table`".$where;
-			$update_check	= (int)$odin->sql->qry($sql,array(":$key"=>$data[":$key"]),NULL,array("return"=>"num_rows"));
+			$update_check	= $odin->sql->qry($sql,array(":$key"=>$data[":$key"]),NULL,array("return"=>"num_rows"));
+var_dump($update_check);
 			if($update_check<1)
 				{ return $this->insert($table,$data,TRUE); }
 		}
