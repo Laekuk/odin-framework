@@ -47,6 +47,7 @@ class bolt_sql
 
 	function qry($sql,$params=array(),$key=FALSE,$opts=NULL)
 	{
+		global $odin;
 		$o	= array(
 			"return"	=> TRUE,#"num_rows","qry_obj"
 		);
