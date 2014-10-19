@@ -46,15 +46,18 @@ class bolt_qdb
 			else
 				{ $update	.= "`$k`=:$k,"; }
 		}
+		#if we don't have something to check against, return false since nothing else here will work.
+		if(empty($where))
+			{ return FALSE; }
 		if($attempt_insert)
 		{
 			$sql			= "SELECT * FROM `$table`".$where;
 			$update_check	= $odin->sql->qry($sql,array(":$key"=>$data[":$key"]));
+			if(empty($update_check))
+				{ return $this->insert($table,$data,TRUE); }
 		}
-		#trim the trailing coma, then add the where condition & run the query. If that query returns false
-		if((!$ret = $odin->sql->qry(substr($update, 0,-1).$where,$data) || empty($where)) && $attempt_insert)
-			{ return $this->insert($table,$data,TRUE); }
-		return $ret;
+		#trim the trailing coma, then add the where condition & return whatever the query gives us.
+		return $odin->sql->qry(substr($update, 0,-1).$where,$data);
 	}
 	
 	function get($table,$opts=NULL)
