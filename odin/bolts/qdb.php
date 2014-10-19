@@ -34,7 +34,7 @@ class bolt_qdb
 		#if update fails to actually exist ($key not in $data or field isn't in the db), call insert().
 		global $odin;
 		#build up the prepared update statement
-		$update	= "UPDATE `$table` SET(";
+		$update	= "UPDATE `$table` SET ";
 		$where	= "";
 		#loop through each field & sort it into its proper place, while at the same time reformatting the array.
 		foreach($data as $k=>$v)
@@ -45,6 +45,11 @@ class bolt_qdb
 				{ $where	= " WHERE `$k`=:$k"; }
 			else
 				{ $update	.= "`$k`=:$k,"; }
+		}
+		if($attempt_insert)
+		{
+			$sql			= "SELECT * FROM `$table`".$where;
+			$update_check	= $odin->sql->qry($sql,array(":$key"=>$data[":$key"]));
 		}
 		#trim the trailing coma, then add the where condition & run the query. If that query returns false
 		if((!$ret = $odin->sql->qry(substr($update, 0,-1).$where,$data) || empty($where)) && $attempt_insert)
