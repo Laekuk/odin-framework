@@ -112,6 +112,15 @@
 				case "hidden":
 				case "disabled":
 				break;
+				#textareas
+				case "textarea":
+					$multifields	= TRUE;
+					$input	= $dom->createElement("textarea",$default);
+					#set a field name on the attribute
+					$fname				= $dom->createAttribute("name");
+					$fname->value		= $instance.'['.$name.']';
+					$input->appendChild($fname);
+				break;
 				case "select":
 					#does this input have multiple field options?
 					if(empty($o["field_opts"][$name]))
