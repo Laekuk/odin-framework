@@ -126,6 +126,11 @@ class bolt_crud
 					}
 					$options[$k]	= $field_opts;
 				break;
+				case "text":
+				case "longtext":
+					$type[$k]		= "textarea";
+					$field[$k]		= implode(" ", $lor);
+				break;
 			}
 			if($v["Default"])
 				{ $field[$k]	= $v["Default"]; }
