@@ -95,9 +95,9 @@ class bolt_sql
 				switch($qry_type)
 				{
 					case "SELECT":
-					case "VIEW":
+					case "SHOW":
 						if(!$key)
-							{ $ret	= $r->fetchAll(); }
+							{ $ret	= $r->fetchAll(); var_dump($r); }
 						else
 						{
 							$ret	= NULL;
