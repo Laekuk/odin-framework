@@ -96,6 +96,7 @@ class bolt_sql
 				{
 					case "SELECT":
 					case "SHOW":
+					case "DESCRIBE":
 						if(!$key)
 							{ $ret	= $r->fetchAll(); }
 						else
