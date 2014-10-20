@@ -5,7 +5,7 @@
 	var $num_instances	= 0;
 
 	#This is an HTML form that allows you to update/edit database data.
-	function create($table,$fields=NULL,$opts=NULL)
+	function create($fields=NULL,$opts=NULL)
 	{
 		global $odin;
 		$this->num_instances++;
@@ -29,20 +29,9 @@
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
-		#if fields were not passed, dynamically get the fields from the database with their defaults & data-types
-		if(!$fields)
-		{
-			#pull fields & types from db. overwrite merge types, preferencing whatever the developer passed over the database's types.
-		}
+		#if fields were not passed, return false
 		if(!$fields)
 			{ return FALSE; }
-
-		/*
-			Dear Future Aaron,
-			This is where you plan to have the $_POST[$instance] check to see if this specific form was posted or not.
-
-			If it was not, then just carry on.
-		*/
 
 		#create the dom object & elements
 		$dom		= new DOMDocument();
