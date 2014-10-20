@@ -3,8 +3,7 @@
 $conf	= (object)array(
 	"developer_ips"		=> array(
 		#this is just what my home IP looks like on the local network. Its using $_SERVER["REMOTE_ADDR"] to check this.
-		"::1",
-#		"300.300.300.300",
+		"127.0.0.1",
 	),
 
 /*	Fair Warning:
