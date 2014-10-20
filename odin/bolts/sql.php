@@ -98,13 +98,13 @@ class bolt_sql
 					case "SHOW":
 					case "DESCRIBE":
 						if(!$key)
-							{ $ret	= $r->fetchAll(); }
+							{ $ret	= $r->fetchAll(PDO::FETCH_ASSOC); }
 						else
 						{
 							$ret	= NULL;
 							for($i=0;$i<$r->rowCount();$i++)
 							{
-								$row				= $r->fetch();
+								$row				= $r->fetch(PDO::FETCH_ASSOC);
 								$ret[$row[$key]]	= $row;
 							}
 						}
