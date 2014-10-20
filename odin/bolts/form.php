@@ -96,7 +96,7 @@
 				$set->appendChild($wrapper);
 			}
 			#get this field's type
-			$type		= (isset($o["types"][$name])?$o["types"][$name]:"text");
+			$type		= (isset($o["field_types"][$name])?$o["field_types"][$name]:"text");
 			#re/set this flag that says if this is one or many fields we're working with for this one "input".
 			$multifields= FALSE;
 			$label_last	= FALSE;
@@ -111,6 +111,58 @@
 				case "label":
 				case "hidden":
 				case "disabled":
+				break;
+				case "select":
+					#does this input have multiple field options?
+					if(empty($o["field_opts"][$name]))
+						{ $o["field_opts"][$name]	= array(0=>"Please Select.."); }
+#					$multifields	= TRUE;
+					#start a ul & give it a class of type-group
+					$input	= $dom->createElement("select");
+					$class	= $dom->createAttribute("class");
+					$class->value	= "$type-group";
+					$input->appendChild($class);
+
+					#append name to this field
+					$fname			= $dom->createAttribute("name");
+					$fname->value	= $instance.'['.$name.']'.($type=="checkbox"?"[]":FALSE);
+					$input->appendChild($fname);
+
+					#loop through all options add them to the ul
+#var_dump($o["field_opts"][$name]);die();
+					foreach($o["field_opts"][$name] as $value=>$label)
+					{
+						$option	= $dom->createElement("option",$label);
+
+						#create the input field itself, then give it name, value, and type attributes.
+						#field value
+						$val			= $dom->createAttribute("value");
+						$val->value		= $value;
+						$option->appendChild($val);
+
+						#check it on if this option's value matches the field's default value.
+						if($value==$default || (is_array($default) && in_array($value, $default)))
+						{
+							$checked		= $dom->createAttribute("checked");
+							$checked->value	= "checked";
+							$option->appendChild($checked);
+						}
+
+						#create a <label> for this option
+/*
+						$opt_label	= $dom->createElement("label");
+						$name_span	= $dom->createElement("span",$label);
+						#add the input field to the label
+						$opt_label->appendChild($field);
+						#add the field-name (span) to the label
+						$opt_label->appendChild($name_span);
+						#add the label to the li
+						$li->appendChild($opt_label);
+						#add the li to the ul
+						$input->appendChild($li);
+*/
+						$input->appendChild($option);
+					}
 				break;
 				#add radio & checkboxes
 				case "radio":
