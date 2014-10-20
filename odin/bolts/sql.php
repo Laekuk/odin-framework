@@ -97,13 +97,13 @@ class bolt_sql
 					case "SELECT":
 					case "SHOW":
 						if(!$key)
-							{ $ret	= $r->fetchAll(); var_dump($r); }
+							{ $ret	= $r->fetchAll(); }
 						else
 						{
 							$ret	= NULL;
 							for($i=0;$i<$r->rowCount();$i++)
 							{
-								$row	= $r->fetch();
+								$row				= $r->fetch();
 								$ret[$row[$key]]	= $row;
 							}
 						}
