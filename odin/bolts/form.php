@@ -138,7 +138,6 @@
 					$input->appendChild($fname);
 
 					#loop through all options add them to the ul
-#var_dump($o["field_opts"][$name]);die();
 					foreach($o["field_opts"][$name] as $value=>$label)
 					{
 						$option	= $dom->createElement("option",$label);
