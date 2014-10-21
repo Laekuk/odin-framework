@@ -9,7 +9,7 @@
 	{
 		global $odin;
 		$this->num_instances++;
-		$instance	= (isset($o["instance"])?$o["instance"]:"inst-".$this->num_instances);
+		$instance	= (isset($opts["instance"])?$opts["instance"]:"inst-".$this->num_instances);
 		$o			= array(
 			"set_element"		=> "fieldset",
 			"set_class"			=> "",
@@ -29,6 +29,7 @@
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
+var_dump($o);
 		#if fields were not passed, return false
 		if(!$fields)
 			{ return FALSE; }
