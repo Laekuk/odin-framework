@@ -48,12 +48,10 @@ class odin{
 			{ return FALSE; }
 		#load the bolt file
 		require_once($paths->bolts.$name.".php");
-/*
-		set $conf & then load this bolt's config file, if it exists.
+/*		set $conf & then load this bolt's config file, if it exists.
 			note: if you do have a bolt config file, then whatever you set into a $conf variable in that php script
 			will be sent into your bolt file
-*/
-		$conf	= NULL;
+*/		$conf	= NULL;
 		if(file_exists($paths->configs.$name.".php"))
 			{ include($paths->configs.$name.".php"); }
 		#get the class name for this bolt.
@@ -62,4 +60,8 @@ class odin{
 		$this->{$name}	= new $cname($conf);
 		return TRUE;
 	}
+
+	#return bool if the method exists inside of a specific bolt. Also auto-loads the bolt.
+	function bolt_method_exists($bolt,$method)
+		{ return method_exists($this->{$bolt},$method); }
 }
