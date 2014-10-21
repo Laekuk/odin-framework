@@ -7,10 +7,13 @@
 */
 class bolt_crud
 {
+	var $num_instances	= 0;
 	#pull down columns from a table and display them as a form, end-user may then insert a new record.
 	function create($table,$opts=NULL)
 	{
 		global $odin;
+		$this->num_instances++;
+		$instance	= (isset($o["instance"])?$o["instance"]:"crud-inst-".$this->num_instances);
 		$o	= array(
 			"form_labels"	=> array("Add"),	#the form's label
 			"supress_cols"	=> NULL,			#an array of columns to hide on the insert form
@@ -19,7 +22,7 @@ class bolt_crud
 			"col_types"		=> NULL,			#an array of column types, which overwrite the database-default-guesses
 			"col_options"	=> NULL,			#an array of column options, which overwrites the database-default-guesses
 			"col_rules"		=> NULL,			#set to overwrite the database-default-guesses for validation rules
-			"instance"		=> NULL,			#set to manually create the id for this form.
+			"instance"		=> $instance,		#set to manually create the id for this form.
 			"headings"		=> NULL,			#set to overwrite the database-default-guesses for column headings
 			"new_set_on"	=> NULL,			#an array of fields to break the fieldsets up on.
 			"foreign_keys"	=> NULL,			#an array("field"=>array("sql"=>"SELECT * FROM `other_table` WHERE `field`>$value",array(":field"=>5))
@@ -43,17 +46,24 @@ class bolt_crud
 
 		if($o["col_rules"])
 			{ $fields["rules"]	= $odin->array->ow_merge_r($fields["rules"],$o["col_rules"]); }
-		/*
-			if there is any post, handle it here.
-		*/
-		$form	= $odin->form->create($fields["fields"],array(
+		
+		if(isset($_REQUEST[$instance]))
+		{
+			$data	= $_REQUEST[$instance];
+			$this->validate_data($data,$fields);
+			die();
+		}
+		$form_opts	= array(
+			"instance"		=> $o["instance"],
 			"submit_text"	=> "Add",
 			"legends"		=> $o["form_labels"],
 			"new_set_on"	=> $o["new_set_on"],
 			"instance"		=> $o["instance"],
 			"field_types"	=> $fields["types"],
 			"field_opts"	=> $fields["options"],
-		));
+		);
+
+		$form	= $odin->form->create($fields["fields"],$form_opts);
 		
 		return $form;
 	}
@@ -61,22 +71,24 @@ class bolt_crud
 	#pull down rows from a table and display them, options to allow the end-user to edit & delete those rows.
 	function manage($table,$opts=NULL)
 	{
+		$this->num_instances++;
+		$instance	= (isset($o["instance"])?$o["instance"]:"crud-inst-".$this->num_instances);
 		$o	= array(
-			"form_label"	=> "Data",	#the form's label
-			"supress_cols"	=> NULL,	#an array of columns to hide on the table (not hidden on the edit-form)
-			"locked_vals"	=> NULL,	#an array of columns & their forced values. This also hides the columns by default (overwritten by col_types)
-			"col_types"		=> NULL,	#an array of column types, which overwrite the database-default-guesses
+			"form_label"	=> "Data",		#the form's label
+			"supress_cols"	=> NULL,		#an array of columns to hide on the table (not hidden on the edit-form)
+			"locked_vals"	=> NULL,		#an array of columns & their forced values. This also hides the columns by default (overwritten by col_types)
+			"col_types"		=> NULL,		#an array of column types, which overwrite the database-default-guesses
 				#For options, se an array("field"=>array("type"=>"select","options"=>array("key"=>"value")))
-			"col_rules"		=> NULL,	#set to overwrite the database-default-guesses for validation rules
-			"instance"		=> NULL,	#set to manually create the id for this form.
-			"headings"		=> NULL,	#set to overwrite the database-default-guesses for column headings
-			"foreign_keys"	=> NULL,	#an array("field"=>array("sql"=>"SELECT * FROM `other_table` WHERE `field`>$value",array(":field"=>5))
+			"col_rules"		=> NULL,		#set to overwrite the database-default-guesses for validation rules
+			"instance"		=> $instance,	#set to manually create the id for this form.
+			"headings"		=> NULL,		#set to overwrite the database-default-guesses for column headings
+			"foreign_keys"	=> NULL,		#an array("field"=>array("sql"=>"SELECT * FROM `other_table` WHERE `field`>$value",array(":field"=>5))
 				#Pulls data from that other_table and loads it into this field's options.
-			"edit"			=> TRUE,	#enables the page to be reloaded as an edit with a $_GET
-			"delete"		=> NULL,	#set to true to allow the user to delete rows
-			"hide_pk"		=> TRUE,	#disable to display the primary key as read-only
-			"order_by"		=> NULL,	#string to force a sort-order of the table
-			"extra_fields"	=> NULL,	#an array of extra fields you might want to throw in
+			"edit"			=> TRUE,		#enables the page to be reloaded as an edit with a $_GET
+			"delete"		=> NULL,		#set to true to allow the user to delete rows
+			"hide_pk"		=> TRUE,		#disable to display the primary key as read-only
+			"order_by"		=> NULL,		#string to force a sort-order of the table
+			"extra_fields"	=> NULL,		#an array of extra fields you might want to throw in
 		);
 	}
 	
@@ -142,5 +154,25 @@ class bolt_crud
 			"options"	=> $options,
 			"rules"		=> $rules,
 		);
+	}
+	
+	function validate_data($data,$field_info)
+	{
+		global $odin;
+		#merge back in the original fields, overwritten by the passed $data. This fixes when checkboxes are not checked on submit.
+		$data	= $odin->array->ow_merge_r($field_info["fields"],$data);
+		$errors	= array();
+		var_dump($data);
+		var_dump($field_info);
+		#validate on rules, recording all errors into $errors.
+		if(!empty($field_info["rules"]))
+		{
+			foreach($field_info["rules"] as $field=>$rules)
+			{
+				#run rules here
+			}
+		}
+		#validate in_array for options?? Not sure if this would be a good idea.
+		die();
 	}
 }
