@@ -129,7 +129,6 @@ class bolt_crud
 				case "text":
 				case "longtext":
 					$type[$k]		= "textarea";
-					$field[$k]		= implode(" ", $lor);
 				break;
 			}
 			if($v["Default"])
