@@ -29,7 +29,6 @@
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
-var_dump($o);
 		#if fields were not passed, return false
 		if(!$fields)
 			{ return FALSE; }
