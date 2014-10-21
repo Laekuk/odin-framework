@@ -21,7 +21,26 @@ class bolt_crud
 			"defaults"		=> NULL,			#an array of columns & their default values, which overwrites the database-default-guesses
 			"col_types"		=> NULL,			#an array of column types, which overwrite the database-default-guesses
 			"col_options"	=> NULL,			#an array of column options, which overwrites the database-default-guesses
-			"col_rules"		=> NULL,			#set to overwrite the database-default-guesses for validation rules
+			"col_rules"		=> NULL,			#set to overwrite the database-default-guesses for validation rules. Acceptable formats are:
+/*				This will validate if the posted value is numeric, if it is not it will return the error message "Must be a Number"
+				array("field"=>array("function_name"	=> "is_numeric",	"error"	=> "Must be A Number"))
+
+				This will run the alpha_num() method inside of the str bolt (passing the posted value to that method as the first paramiter),
+					then replace whatever was posted with the alpha_num
+				array(
+					"field"=>array(
+						"bolt"					=> "str",
+						"method"				=> "alpha_num",
+						"use_returned_value"	=> TRUE,
+					)
+				)
+
+				This will validate if the posted value is numeric, if it is not it will set the posted value to an int of 0
+				array("field"=>array("function_name"	=> "is_numeric",	"fix_value"	=> 0))
+
+				This will overwrite your posted data's value with "Tested"
+				array("field"=>array("set"				=> "Tested"))
+*/
 			"instance"		=> $instance,		#set to manually create the id for this form.
 			"headings"		=> NULL,			#set to overwrite the database-default-guesses for column headings
 			"new_set_on"	=> NULL,			#an array of fields to break the fieldsets up on.
@@ -50,7 +69,8 @@ class bolt_crud
 		if(isset($_REQUEST[$instance]))
 		{
 			$data	= $_REQUEST[$instance];
-			$this->validate_data($data,$fields);
+			$info	= $this->validate_data($data,$fields);
+			var_dump($info);
 			die();
 		}
 		$form_opts	= array(
@@ -123,7 +143,9 @@ class bolt_crud
 					if($field_info>1)
 					{
 						$type[$k]	= "number";
-						$rules[$k]	= array("is_numeric");
+						$rules[$k]	= array(
+							array("func"=>"is_numeric","fix_value"=>0),
+						);
 					}
 					else
 						{ $type[$k]	= "checkbox"; }
@@ -159,20 +181,78 @@ class bolt_crud
 	function validate_data($data,$field_info)
 	{
 		global $odin;
-		#merge back in the original fields, overwritten by the passed $data. This fixes when checkboxes are not checked on submit.
-		$data	= $odin->array->ow_merge_r($field_info["fields"],$data);
+		//!Fix Checkboxes
+		#find all checkbox fields, throw them into the $checkboxes array
+		$checkboxes	= array_keys($field_info["types"],"checkbox");
+		if($checkboxes)
+		{
+			#Alter the posted fields the default values to be blank
+			foreach($checkboxes as $field)
+			{
+				if(!isset($data[$field]))
+					{ $field_info["fields"][$field]	= ""; }
+			}
+			#merge back in the original fields, overwritten by the passed $data. This fixes when checkboxes are not checked on submit
+			#doing it this way keeps their keys in their proper order, passed data values still passed, and unchecked checkboxes still have keys
+			$data	= $odin->array->ow_merge_r($field_info["fields"],$data);
+		}
+
+		//!Validate field options to make sure it was correctly passed
+		if(!empty($field_info["options"]))
+		{
+			foreach($field_info["options"] as $opt_field=>$options)
+			{
+				$data_val	= $data[$field];
+				if(!isset($options[$data_val]))
+					{ $errors[$field][]	= "Invalid answer"; }
+			}
+		}
+
 		$errors	= array();
-		var_dump($data);
-		var_dump($field_info);
-		#validate on rules, recording all errors into $errors.
+		//!Run validation rules, recording all errors into $errors
 		if(!empty($field_info["rules"]))
 		{
 			foreach($field_info["rules"] as $field=>$rules)
 			{
-				#run rules here
+				#loop through the rules array in order of their array position
+				$data_val	= $data[$field];
+				foreach($rules as $rule)
+				{
+					switch(TRUE)
+					{
+						#set the posted value to whatever $rule[set] is
+						case isset($rule["set"]):
+							$data_val	= $rule["set"];
+						break;
+						case $is_function=(isset($rule["func"]) && function_exists($rule["func"])):
+						case (isset($rule["bolt"],$rule["method"]) && $odin->bolt_method_exists($rule["bolt"],$rule["method"])):
+							#this is a function, run it
+							if($is_function)
+								{ $valid	= $rule["func"]($data_val); }
+							else	#this must be a bolt/method, run it
+								{ $valid	= call_user_func_array(array($odin->{$rule["bolt"]},$rule["method"]), array($data_val)); }
+
+							#handle failed validations
+							if(!$valid && (isset($rule["fix_value"]) || $rule["error"]))
+							{
+								if(isset($rule["fix_value"]))
+									{ $data_val			= $rule["fix_value"]; }
+								else
+									{ $errors[$field][]	= $rule["error"]; }
+							}
+							#are we going to overwrite data with the validation value?
+							if(!empty($rule["use_returned_value"]))
+								{ $data_val	= $valid; }
+						break;
+					}
+				}
+				#inject the $data_val back into the $data
+				$data[$field]	= $data_val;
 			}
 		}
-		#validate in_array for options?? Not sure if this would be a good idea.
-		die();
+		return array(
+			"data"		=> $data,
+			"errors"	=> $errors,
+		);
 	}
 }
