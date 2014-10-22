@@ -48,6 +48,7 @@ class bolt_crud
 			"new_set_on"	=> NULL,			#an array of fields to break the fieldsets up on.
 			"foreign_keys"	=> NULL,			#an array("field"=>array("sql"=>"SELECT * FROM `other_table` WHERE `field`>$value",array(":field"=>5))
 				#Pulls data from that other_table and loads it into this field's options.
+			"hide_pk"		=> TRUE,		#disable to display the primary key as read-only
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
@@ -91,7 +92,7 @@ class bolt_crud
 		if($o["supress_cols"])
 			{ $hide_fields	= array_merge($hide_fields,$o["supress_cols"]); }
 		if($o["hide_pk"])
-			{ $hide_fields	= array_merge($hide_fields,array($primary)); }
+			{ $hide_fields	= array_merge($hide_fields,array($fields["primary"])); }
 		$form_opts	= array(
 			"instance"		=> $o["instance"],
 			"submit_text"	=> "Add",
