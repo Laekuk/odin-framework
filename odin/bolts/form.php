@@ -21,6 +21,7 @@
 			"instance"			=> $instance,
 			"field_types"		=> array(),
 			"field_opts"		=> array(),
+			"hide_fields"		=> array(),
 			"form_attrs"		=> array(
 				"id"				=> $instance,
 				"method"			=> "post",
@@ -286,7 +287,7 @@
 
 				}
 				$element->appendChild($label);
-				$wrapper->appendChild($element);
+#				$wrapper->appendChild($element);
 			}
 			else
 			{
@@ -307,8 +308,8 @@
 					$element->appendChild($input);
 
 				}
-				$wrapper->appendChild($element);
 			}
+			$wrapper->appendChild($element);
 		}
 
 		#Add the remaining dom elements to the output
