@@ -233,7 +233,7 @@ class bolt_crud
 								{ $valid	= call_user_func_array(array($odin->{$rule["bolt"]},$rule["method"]), array($data_val)); }
 
 							#flip valid?
-							if($rule["flip_valid"])
+							if(isset($rule["flip_valid"]))
 								{ $valid	= !$valid; }
 
 							#handle failed validations
