@@ -7,6 +7,8 @@ class bolt_qdb
 	function insert($table,$data,$skip_colin_prefix=FALSE)
 	{
 		global $odin;
+		#loose cleanse against possible injections.
+		$table	= $odin->str->alpha_num($table);
 		#build up the prepared update statement
 		$insert	= "INSERT INTO `$table` ";
 		$fields	= "(";
