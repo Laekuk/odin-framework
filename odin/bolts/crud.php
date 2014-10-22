@@ -225,12 +225,16 @@ class bolt_crud
 							$data_val	= $rule["set"];
 						break;
 						case $is_function=(isset($rule["func"]) && function_exists($rule["func"])):
-						case (isset($rule["bolt"],$rule["method"]) && $odin->bolt_method_exists($rule["bolt"],$rule["method"])):
-							#this is a function, run it
-							if($is_function)
+						case $is_bolt=(isset($rule["bolt"],$rule["method"]) && $odin->bolt_method_exists($rule["bolt"],$rule["method"])):
+							$valid	= NULL;
+							if($is_function)	#this is a function, run it
 								{ $valid	= $rule["func"]($data_val); }
-							else	#this must be a bolt/method, run it
+							elseif($is_bolt)	#this must be a bolt/method, run it
 								{ $valid	= call_user_func_array(array($odin->{$rule["bolt"]},$rule["method"]), array($data_val)); }
+
+							#flip valid?
+							if($rule["flip_valid"])
+								{ $valid	= !$valid; }
 
 							#handle failed validations
 							if(!$valid && (isset($rule["fix_value"]) || $rule["error"]))
