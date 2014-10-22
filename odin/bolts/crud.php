@@ -87,6 +87,11 @@ class bolt_crud
 				#interlace errors into form somehow
 			}
 		}
+		$hide_fields	= array();
+		if($o["supress_cols"])
+			{ $hide_fields	= array_merge($hide_fields,$o["supress_cols"]); }
+		if($o["hide_pk"])
+			{ $hide_fields	= array_merge($hide_fields,array($primary)); }
 		$form_opts	= array(
 			"instance"		=> $o["instance"],
 			"submit_text"	=> "Add",
@@ -95,6 +100,7 @@ class bolt_crud
 			"instance"		=> $o["instance"],
 			"field_types"	=> $fields["types"],
 			"field_opts"	=> $fields["options"],
+			"hide_fields"	=> $hide_fields,
 		);
 
 		$form	= $odin->form->create($fields["fields"],$form_opts);
