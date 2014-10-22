@@ -72,6 +72,15 @@
 		$submit_attr		= $dom->createAttribute("type");
 		$submit_attr->value	= "submit";
 		$submit->appendChild($submit_attr);
+
+		$hidden_wrap		= $dom->createElement($o["wrap_element"]);
+		$attr				= $dom->createAttribute("style");
+		$attr->value		= "display:none;";
+		$hidden_wrap->appendChild($attr);
+		$attr				= $dom->createAttribute("class");
+		$attr->value		= "hidden-elements";
+		$hidden_wrap->appendChild($attr);
+
 		
 		$submit_wrap->appendChild($submit);
 
@@ -287,7 +296,6 @@
 
 				}
 				$element->appendChild($label);
-#				$wrapper->appendChild($element);
 			}
 			else
 			{
@@ -309,11 +317,16 @@
 
 				}
 			}
-			$wrapper->appendChild($element);
+			
+			if(in_array($name, $o["hide_fields"]))
+				{ $hidden_wrap->appendChild($element); }
+			else
+				{ $wrapper->appendChild($element); }
 		}
 
 		#Add the remaining dom elements to the output
 		$form->appendChild($set);
+		$form->appendChild($hidden_wrap);
 		$form->appendChild($submit_wrap);
 
 		#finally, write the form tag into the dom object. Then return the dom as HTML
