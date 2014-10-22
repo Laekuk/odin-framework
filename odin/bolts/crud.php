@@ -13,6 +13,8 @@ class bolt_crud
 	{
 		global $odin;
 		$this->num_instances++;
+		#loose cleanse against possible injections.
+		$table	= $odin->str->alpha_num($table);
 		$instance	= (isset($o["instance"])?$o["instance"]:"crud-inst-".$this->num_instances);
 		$o	= array(
 			"form_labels"	=> array("Add"),	#the form's label
@@ -49,8 +51,6 @@ class bolt_crud
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
-		#loose cleanse against possible injections.
-		$table	= $odin->str->alpha_num($table);
 		$sql	= "DESCRIBE `$table`";
 		$fields	= $odin->sql->qry($sql,NULL,"Field");
 		$fields	= $this->parse_fields($fields);
@@ -70,8 +70,22 @@ class bolt_crud
 		{
 			$data	= $_REQUEST[$instance];
 			$info	= $this->validate_data($data,$fields);
-			var_dump($info);
-			die();
+			if(empty($info["errors"]))
+			{
+				#insert into database.
+				$insert	= $odin->qdb->insert($table,$info["data"]);
+				if(!$insert)
+					{ $info["errors"]["_general"]	= "Unable to complete action."; }
+				else#throw a general form error.
+				{
+					#clear post.
+					unset($_POST[$instance]);
+				}
+			}
+			else
+			{
+				#interlace errors into form somehow
+			}
 		}
 		$form_opts	= array(
 			"instance"		=> $o["instance"],
@@ -141,14 +155,13 @@ class bolt_crud
 					$field_info	= $field_info[0];
 					#treat this like a boolean by default.
 					if($field_info>1)
-					{
-						$type[$k]	= "number";
-						$rules[$k]	= array(
-							array("func"=>"is_numeric","fix_value"=>0),
-						);
-					}
+						{ $type[$k]	= "number"; }
 					else
 						{ $type[$k]	= "checkbox"; }
+					#force an integer type
+					$rules[$k]	= array(
+						array("func"=>"is_numeric","fix_value"=>0),
+					);
 				break;
 				case "enum":
 					$type[$k]		= "select";
@@ -208,33 +221,53 @@ class bolt_crud
 			}
 		}
 
+/*
+Valid Rule Options:
+	- set							: if set, this will be 
+	- skip							: if set to true, this field will be removed from data.
+	- "func" or "bolt" & "method"	: either the name of a global function, or a bolt/method combo to call.
+		- use_returned_value		: If this is set, replace the data value with whatever your function or method returned.
+		- flip_valid				: If this is set, reverse the outcome of $valid so true becomes false, false becomes true.
+		- skip						: If $valid is true, remove this field from the data.
+		- error						: If $valid is false, return this error string.
+		- fix_value					: If this is set & $valid is false, set the value to this. This overrides the "error" message from appearing, if both are set.
+*/
 		$errors	= array();
 		//!Run validation rules, recording all errors into $errors
 		if(!empty($field_info["rules"]))
 		{
+var_dump($field_info["rules"]);
 			foreach($field_info["rules"] as $field=>$rules)
 			{
 				#loop through the rules array in order of their array position
 				$data_val	= $data[$field];
 				foreach($rules as $rule)
 				{
+					$skip	= FALSE;
 					switch(TRUE)
 					{
 						#set the posted value to whatever $rule[set] is
 						case isset($rule["set"]):
 							$data_val	= $rule["set"];
 						break;
+						case isset($rule["skip"]):
+							$skip	= TRUE;
+						break;
 						case $is_function=(isset($rule["func"]) && function_exists($rule["func"])):
 						case $is_bolt=(isset($rule["bolt"],$rule["method"]) && $odin->bolt_method_exists($rule["bolt"],$rule["method"])):
+							#run & possibly adjust the validation method.
 							$valid	= NULL;
 							if($is_function)	#this is a function, run it
 								{ $valid	= $rule["func"]($data_val); }
 							elseif($is_bolt)	#this must be a bolt/method, run it
 								{ $valid	= call_user_func_array(array($odin->{$rule["bolt"]},$rule["method"]), array($data_val)); }
-
-							#flip valid?
+							#flip the validation outcome?
 							if(isset($rule["flip_valid"]))
 								{ $valid	= !$valid; }
+
+							#should we skip this field?
+							if(!$valid && isset($rule["skip"]))
+								{ $skip	= TRUE; }
 
 							#handle failed validations
 							if(!$valid && (isset($rule["fix_value"]) || $rule["error"]))
@@ -251,7 +284,10 @@ class bolt_crud
 					}
 				}
 				#inject the $data_val back into the $data
-				$data[$field]	= $data_val;
+				if($skip)
+					{ unset($data[$field]); }
+				else
+					{ $data[$field]	= $data_val; }
 			}
 		}
 		return array(
