@@ -333,7 +333,7 @@
 		return $dom->saveHTML();
 	}
 	
-	function view()
+	function table()
 	{
 		
 	}
