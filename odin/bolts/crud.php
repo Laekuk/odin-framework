@@ -235,7 +235,7 @@ Valid Rule Options:
 	- "func" or "bolt" & "method"	: either the name of a global function, or a bolt/method combo to call.
 		- use_returned_value		: If this is set, replace the data value with whatever your function or method returned.
 		- flip_valid				: If this is set, reverse the outcome of $valid so true becomes false, false becomes true.
-		- skip						: If $valid is true, remove this field from the data.
+		- invalid_skip				: If $valid is true, remove this field from the data.
 		- error						: If $valid is false, return this error string.
 		- fix_value					: If this is set & $valid is false, set the value to this. This overrides the "error" message from appearing, if both are set.
 */
@@ -273,7 +273,7 @@ var_dump($field_info["rules"]);
 								{ $valid	= !$valid; }
 
 							#should we skip this field?
-							if(!$valid && isset($rule["skip"]))
+							if(!$valid && isset($rule["invalid_skip"]))
 								{ $skip	= TRUE; }
 
 							#handle failed validations
