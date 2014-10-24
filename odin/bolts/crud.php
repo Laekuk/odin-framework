@@ -167,7 +167,7 @@ class bolt_crud
 						{ $type[$k]	= "checkbox"; }
 					#force an integer type
 					$rules[$k]	= array(
-						array("func"=>"is_numeric","fix_value"=>0),
+						array("callback"=>"is_numeric","fix_value"=>0),
 					);
 				break;
 				case "enum":
@@ -260,14 +260,26 @@ var_dump($field_info["rules"]);
 						case isset($rule["skip"]):
 							$skip	= TRUE;
 						break;
-						case $is_function=(isset($rule["func"]) && function_exists($rule["func"])):
-						case $is_bolt=(isset($rule["bolt"],$rule["method"]) && $odin->bolt_method_exists($rule["bolt"],$rule["method"])):
+						case isset($rule["callback"]):
+							if(is_array($rule["callback"]))
+							{
+								$method	= array_pop($rule["callback"]);
+								if(method_exists($rule["callback"],$method))
+									{ $valid	= call_user_func_array(array($rule["callback"],$method), array($data_val)); }
+							}
+							else
+							{
+								if(function_exists($rule["callback"]))
+									{ $valid	= $rule["callback"]($data_val); }
+							}
 							#run & possibly adjust the validation method.
-							$valid	= NULL;
-							if($is_function)	#this is a function, run it
-								{ $valid	= $rule["func"]($data_val); }
-							elseif($is_bolt)	#this must be a bolt/method, run it
-								{ $valid	= call_user_func_array(array($odin->{$rule["bolt"]},$rule["method"]), array($data_val)); }
+/*
+	$valid	= NULL;
+	if($is_function)	#this is a function, run it
+		{ $valid	= $rule["func"]($data_val); }
+	elseif($is_bolt)	#this must be a bolt/method, run it
+		{ $valid	= call_user_func_array(array($odin->{$rule["bolt"]},$rule["method"]), array($data_val)); }
+*/
 							#flip the validation outcome?
 							if(isset($rule["flip_valid"]))
 								{ $valid	= !$valid; }
