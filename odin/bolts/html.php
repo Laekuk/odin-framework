@@ -332,7 +332,9 @@
 			"caption"			=> "",
 			"skip_cols"			=> array(),			#an array(column,..) of columns to skip
 			"add_cols"			=> array(),			#an array(column=>string,..) of fields to tack onto the end of this. You may use replace variables with {}
-														#example: "hello {name}" would pull the name column for this row & replace with that value
+														#example: "hello {name}" would pull the name column for this row & replace with that value.
+														#note: this can also overwrite previous fields too
+			"add_replaces"		=> array(),			#an array(variable=>string,..) which replaces into the add_cols
 			"headings"			=> array(),			#an array(column=>string,..) of replacement headings for each column
 			"tbl_attrs"			=> array(			#an array(attr=>value,..) of all table attributes
 				"id"				=> $instance,
@@ -346,14 +348,27 @@
 		{
 			#loop through all $data, adding in those $add_cols to the end, while running str_replace on them.
 			$keys		= array_keys(current($data));
-			$wrap_keys	= function(&$val){
-				$val		= "{$val}";
-			};
+			$wrap_keys	= function(&$val){ $val	= "{".$val."}"; };
 			array_walk($keys, $wrap_keys);
+			if(!empty($o["add_replaces"]))
+			{
+				$ar_keys	= array_keys($o["add_replaces"]);
+				$ar_vals	= array_values($o["add_replaces"]);
+				array_walk($ar_keys, $wrap_keys);
+			}
 			foreach($data as $k=>$v)
 			{
 				foreach($o["add_cols"] as $name=>$string)
-					{ $data[$k][$name]	= str_replace($keys, $v, $string); }
+				{
+					#if the column is already set, use its value instead of $string.
+					if(isset($data[$k][$name]))
+						{ $string	= $data[$k][$name]; }
+					#if there are add_replace key/values, run those first so that if they contain {field_name}s, they will be replaced too.
+					if(isset($ar_keys))
+						{ $string	= str_replace($ar_keys, $ar_vals, $string); }
+					#replace this row's field names with field values
+					$data[$k][$name]	= str_replace($keys, $v, $string);
+				}
 			}
 		}
 		#create the dom object & elements
