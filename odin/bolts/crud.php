@@ -104,7 +104,7 @@ class bolt_crud
 			"hide_fields"	=> $hide_fields,
 		);
 
-		$form	= $odin->form->create($fields["fields"],$form_opts);
+		$form	= $odin->html->form($fields["fields"],$form_opts);
 		
 		return $form;
 	}
