@@ -389,13 +389,13 @@
 		$table->appendChild($tbody);
 
 		$row_count	= 0;
-		foreach($data as $columns)
+		foreach($data as $row_key=>$columns)
 		{
 			$row_count++;
 			#generate new <tr> tag & its classes
 			$tr			= $dom->createElement("tr");
 			$tr_classes	= $dom->createAttribute("class");
-			$tr_classes->value	= ($row_count%2?"even":"odd")." row-".$row_count;
+			$tr_classes->value	= ($row_count%2?"odd":"even")." row-".$row_key;
 			$tr->appendChild($tr_classes);
 			foreach($columns as $name=>$value)
 			{
