@@ -27,7 +27,7 @@
 			"field_opts"		=> array(),				#any field options (select <options>, or a checkbox/radio groups options)
 			"hide_fields"		=> array(),				#an array(field,..) of fields to hide (they will still be in your $_REQUEST ($_POST+$_GET) vars
 			"headings"			=> array(),				#an array(field=>string,..) of headings with 
-			"form_attrs"		=> array(				#an array(attr=>value,..) of all 
+			"form_attrs"		=> array(				#an array(attr=>value,..) of all form attributes
 				"id"				=> $instance,											#gives the form an id of its $instance
 				"method"			=> "post",												#post by default
 				"action"			=> preg_split("/[\?]+/",$_SERVER["REQUEST_URI"],2)[0],	#by default, use the current url, exlucing any $_GET variables.
@@ -59,7 +59,7 @@
 		$set->appendChild($set_attr);
 		if($o["legends"])
 		{
-			$legend			= $dom->createElement("legend",is_array($o["legends"])?array_shift($o["legends"]):$o["legends"]);
+			$legend			= $dom->createElement("legend",htmlentities(is_array($o["legends"])?array_shift($o["legends"]):$o["legends"]));
 			$set->appendChild($legend);
 		}
 		
@@ -73,7 +73,7 @@
 		$attr->value		= "buttons";
 		$submit_wrap->appendChild($attr);
 
-		$submit				= $dom->createElement("button", $o["submit_text"]);
+		$submit				= $dom->createElement("button", htmlentities($o["submit_text"]));
 		$submit_attr		= $dom->createAttribute("type");
 		$submit_attr->value	= "submit";
 		$submit->appendChild($submit_attr);
@@ -103,7 +103,7 @@
 				$set->appendChild($set_attr);
 				if($o["legends"])
 				{
-					$legend			= $dom->createElement("legend",is_array($o["legends"])?array_shift($o["legends"]):$o["legends"]);
+					$legend			= $dom->createElement("legend",htmlentities(is_array($o["legends"])?array_shift($o["legends"]):$o["legends"]));
 					$set->appendChild($legend);
 				}
 				
@@ -130,7 +130,7 @@
 				#textareas
 				case "textarea":
 					$multifields	= TRUE;
-					$input	= $dom->createElement("textarea",$default);
+					$input	= $dom->createElement("textarea",htmlentities($default));
 					#set a field name on the attribute
 					$fname				= $dom->createAttribute("name");
 					$fname->value		= $instance.'['.$name.']';
@@ -155,7 +155,7 @@
 					#loop through all options add them to the ul
 					foreach($o["field_opts"][$name] as $value=>$label)
 					{
-						$option	= $dom->createElement("option",$label);
+						$option	= $dom->createElement("option",htmlentities($label));
 
 						#create the input field itself, then give it name, value, and type attributes.
 						#field value
@@ -216,7 +216,7 @@
 
 							#create a <label> for this option
 							$opt_label	= $dom->createElement("label");
-							$name_span	= $dom->createElement("span",$label);
+							$name_span	= $dom->createElement("span",htmlentities($label));
 							#add the input field to the label
 							$opt_label->appendChild($field);
 							#add the field-name (span) to the label
@@ -270,7 +270,7 @@
 					$input->appendChild($dval);
 				}
 				#create a span with the field's name in it and add that into the label tag.
-				$name_span	= $dom->createElement("span",(isset($o["headings"][$name])?:$name));
+				$name_span	= $dom->createElement("span",htmlentities(isset($o["headings"][$name])?:$name));
 				if($label_last)
 				{
 					#add the input to the label
@@ -293,7 +293,7 @@
 /*				This is a multi-field attribute, which means that $input is already done.
 				Don't modify it or wrap a label around it or anything, just add its name span before you add it to the wrapper.
 				Just stick it straight in!!
-*/				$name_span	= $dom->createElement("span",$name);
+*/				$name_span	= $dom->createElement("span",htmlentities($name));
 				if($label_last)
 				{
 					$element->appendChild($input);
@@ -323,25 +323,103 @@
 		return $dom->saveHTML();
 	}
 	
-	function table($fields)
+	function table($data,$opts=NULL)
 	{
 		global $odin;
 		$this->num_instances++;
 		$instance	= (isset($opts["instance"])?$opts["instance"]:"inst-".$this->num_instances);
 		$o			= array(
-			"captions"			=> array(),
-			"new_set_on"		=> array(),
-			"hide_fields"		=> array(),
-			"headings"			=> array(),
-			"tbl_attrs"		=> array(
+			"caption"			=> "",
+			"skip_cols"			=> array(),			#an array(column,..) of columns to skip
+			"add_cols"			=> array(),			#an array(column=>string,..) of fields to tack onto the end of this. You may use replace variables with {}
+														#example: "hello {name}" would pull the name column for this row & replace with that value
+			"headings"			=> array(),			#an array(column=>string,..) of replacement headings for each column
+			"tbl_attrs"			=> array(			#an array(attr=>value,..) of all table attributes
 				"id"				=> $instance,
 			),
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
+		if(!empty($o["skip_cols"]))
+			{ $o["skip_cols"]	= array_flip($o["skip_cols"]); }
+		if(!empty($o["add_cols"]))
+		{
+			#loop through all $data, adding in those $add_cols to the end, while running str_replace on them.
+			$keys		= array_keys(current($data));
+			$wrap_keys	= function(&$val){
+				$val		= "{$val}";
+			};
+			array_walk($keys, $wrap_keys);
+			foreach($data as $k=>$v)
+			{
+				foreach($o["add_cols"] as $name=>$string)
+					{ $data[$k][$name]	= str_replace($keys, $v, $string); }
+			}
+		}
 		#create the dom object & elements
 		$dom		= new DOMDocument();
 		$table		= $dom->createElement("table");
+		#add on any table attributes.
+		if(!empty($o["tbl_attrs"]))
+		{
+			foreach($o["tbl_attrs"] as $attr=>$value)
+			{
+				$table_attr			= $dom->createAttribute($attr);
+				$table_attr->value	= $value;
+				$table->appendChild($table_attr);
+			}
+		}
+		#this is the first itteration through the fields, so do headings.
+		$first		= TRUE;
+		#create <thead>
 		$thead		= $dom->createElement("thead");
+		$head_tr	= $dom->createElement("tr");
+		#set a class to the <th>'s <tr> tag.
+		$head_class	= $dom->createAttribute("class");
+		$head_class->value = "headings";
+		$head_tr->appendChild($head_class);
+		#create <tbody>
+		$tbody		= $dom->createElement("thead");
+		
+		#append children where they need to go.
+		if(!empty($o["caption"]))
+			{ $table->appendChild($dom->createElement("caption",htmlentities($o["caption"]))); }
+		$thead->appendChild($head_tr);
+		$table->appendChild($thead);
+		$table->appendChild($tbody);
+
+		$row_count	= 0;
+		foreach($data as $columns)
+		{
+			$row_count++;
+			#generate new <tr> tag & its classes
+			$tr			= $dom->createElement("tr");
+			$tr_classes	= $dom->createAttribute("class");
+			$tr_classes->value	= ($row_count%2?"even":"odd")." row-".$row_count;
+			$tr->appendChild($tr_classes);
+			foreach($columns as $name=>$value)
+			{
+				#skip this column?
+				if(!isset($o["skip_cols"][$name]))
+				{
+					#is this the first row ever?
+					if($first)
+					{
+						$th	= $dom->createElement("th",htmlentities(isset($o["headings"][$name])?$o["headings"][$name]:$name));
+						$head_tr->appendChild($th);
+					}
+					#create the <th> tag & fill it with your values.
+					$td	= $dom->createElement("th",htmlentities($value));
+					$td_classes	= $dom->createAttribute("class");
+					$td_classes->value	= $name;
+					$td->appendChild($td_classes);
+					$tr->appendChild($td);
+				}
+			}
+			$tbody->appendChild($tr);
+			$first	= NULL;
+		}
+		$dom->appendChild($table);
+		return $dom->saveHTML();
 	}
 }
