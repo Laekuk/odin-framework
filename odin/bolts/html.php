@@ -10,21 +10,27 @@
 		$this->num_instances++;
 		$instance	= (isset($opts["instance"])?$opts["instance"]:"inst-".$this->num_instances);
 		$o			= array(
-			"set_element"		=> "fieldset",
-			"set_class"			=> "",
-			"wrap_element"		=> "ul",
-			"item_element"		=> "li",
-			"legends"			=> array(),
-			"new_set_on"		=> array(),
-			"submit_text"		=> "Submit",
-			"instance"			=> $instance,
-			"field_types"		=> array(),
-			"field_opts"		=> array(),
-			"hide_fields"		=> array(),
-			"form_attrs"		=> array(
-				"id"				=> $instance,
-				"method"			=> "post",
-				"action"			=> $_SERVER["REQUEST_URI"],
+			"set_element"		=> "fieldset",			#the "set" element, defaulted to <fieldset>.
+			"set_class"			=> "",					#string of all classes you want to put on each set element
+			"wrap_element"		=> "ul",				#the wrapping element, defaulted to <ul>
+			"item_element"		=> "li",				#each item's element, defaulted to <li>
+			"new_set_on"		=> array(),				#an array(field,..) of field names, when the code finds one of them, it will start a new set
+															#with that field as the first element in the new set.
+			"legends"			=> array(),				#an array(string,..) of all legends to use. once the array ends, any remaining sets will be left with no legend
+															#use a null value or blank string to skip fieldsets, if you need to
+			"submit_text"		=> "Submit",			#text of the submit button
+			"instance"			=> $instance,			#a unique instance (per page load) used in the field's name field to group them together
+															#This auto-incriments if left blank.
+															#If you leave it blank be careful to not change the number of forms called between each pageload
+			"field_types"		=> array(),				#an array(field=>select,field=>texarea) of field types (select, textarea, etc-).
+															#This defaults to a type of "text" if unset for any fields
+			"field_opts"		=> array(),				#any field options (select <options>, or a checkbox/radio groups options)
+			"hide_fields"		=> array(),				#an array(field,..) of fields to hide (they will still be in your $_REQUEST ($_POST+$_GET) vars
+			"headings"			=> array(),				#an array(field=>string,..) of headings with 
+			"form_attrs"		=> array(				#an array(attr=>value,..) of all 
+				"id"				=> $instance,											#gives the form an id of its $instance
+				"method"			=> "post",												#post by default
+				"action"			=> preg_split("/[\?]+/",$_SERVER["REQUEST_URI"],2)[0],	#by default, use the current url, exlucing any $_GET variables.
 			),
 		);
 		if($opts)
@@ -164,20 +170,6 @@
 							$checked->value	= "checked";
 							$option->appendChild($checked);
 						}
-
-						#create a <label> for this option
-/*
-						$opt_label	= $dom->createElement("label");
-						$name_span	= $dom->createElement("span",$label);
-						#add the input field to the label
-						$opt_label->appendChild($field);
-						#add the field-name (span) to the label
-						$opt_label->appendChild($name_span);
-						#add the label to the li
-						$li->appendChild($opt_label);
-						#add the li to the ul
-						$input->appendChild($li);
-*/
 						$input->appendChild($option);
 					}
 				break;
@@ -278,7 +270,7 @@
 					$input->appendChild($dval);
 				}
 				#create a span with the field's name in it and add that into the label tag.
-				$name_span	= $dom->createElement("span",$name);
+				$name_span	= $dom->createElement("span",(isset($o["headings"][$name])?:$name));
 				if($label_last)
 				{
 					#add the input to the label
@@ -340,12 +332,16 @@
 			"captions"			=> array(),
 			"new_set_on"		=> array(),
 			"hide_fields"		=> array(),
+			"headings"			=> array(),
 			"tbl_attrs"		=> array(
 				"id"				=> $instance,
 			),
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
-		
+		#create the dom object & elements
+		$dom		= new DOMDocument();
+		$table		= $dom->createElement("table");
+		$thead		= $dom->createElement("thead");
 	}
 }
