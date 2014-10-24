@@ -298,12 +298,10 @@
 			}
 			else
 			{
-/*
-				This is a multi-field attribute, which means that $input is already done.
+/*				This is a multi-field attribute, which means that $input is already done.
 				Don't modify it or wrap a label around it or anything, just add its name span before you add it to the wrapper.
 				Just stick it straight in!!
-*/
-				$name_span	= $dom->createElement("span",$name);
+*/				$name_span	= $dom->createElement("span",$name);
 				if($label_last)
 				{
 					$element->appendChild($input);
@@ -333,8 +331,21 @@
 		return $dom->saveHTML();
 	}
 	
-	function table()
+	function table($fields)
 	{
+		global $odin;
+		$this->num_instances++;
+		$instance	= (isset($opts["instance"])?$opts["instance"]:"inst-".$this->num_instances);
+		$o			= array(
+			"captions"			=> array(),
+			"new_set_on"		=> array(),
+			"hide_fields"		=> array(),
+			"tbl_attrs"		=> array(
+				"id"				=> $instance,
+			),
+		);
+		if($opts)
+			{ $o	= $odin->array->ow_merge_r($o,$opts); }
 		
 	}
 }
