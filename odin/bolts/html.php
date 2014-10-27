@@ -424,8 +424,12 @@
 						$head_tr->appendChild($th);
 					}
 					#create the <th> tag & fill it with your values.
-					$td	= $dom->createElement("th",htmlentities($value));
-					$td_classes	= $dom->createAttribute("class");
+					$td					= $dom->createElement("td",htmlentities($value));
+/*
+					$td					= $dom->createElement("td");
+					$td->innerHTML		= $value;
+*/
+					$td_classes			= $dom->createAttribute("class");
 					$td_classes->value	= $name;
 					$td->appendChild($td_classes);
 					$tr->appendChild($td);
