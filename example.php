@@ -19,3 +19,10 @@ echo $odin->_frigg->hello_olympus();
 	There is also a configurations system in place. All configs are passed to your constructor, if any exist to be loaded.
 	Documentation for configs coming later.
 */
+
+
+/*
+	Bricks
+	Example of running a brick named _freyja, running the TOIF() method.
+*/
+echo $odin->brick->_freyja->TOIF();
