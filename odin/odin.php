@@ -12,8 +12,7 @@ class odin{
 		From here on, we will be reffering to all php libraries/classes as "bolts".
 	*/
 
-	#holding place for loaded bolts.
-	var $bolts			= array();
+	#reserved names that are not allowed to be loaded.
 	var $reserved_names	= array("load_bolt"=>TRUE,"bolts"=>TRUE,"odin"=>TRUE,"reserved_names"=>TRUE);
 	function __construct($my_dir,$conf_dir="_conf")
 	{
