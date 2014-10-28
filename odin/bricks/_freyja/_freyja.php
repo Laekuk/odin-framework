@@ -2,11 +2,10 @@
 class brick__freyja extends brick_mortar
 {
 	var $config;
-	var $my_path;
 	function __construct($conf)
 	{
 		$this->config	= $conf;
-		$this->set_brick_path(dirname(__FILE__)."/",str_replace("brick_",NULL,__CLASS__));
+		$this->set_brick_path(dirname(__FILE__).'/',str_replace('brick_','',__CLASS__));
 	}
 
 	function TOIF($saying=FALSE)
