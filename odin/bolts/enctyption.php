@@ -4,11 +4,12 @@ class bolt_encryption
 	function __construct($conf)
 	{
 		$this->key			= "e193dd5cfbc8fc80609e406f992e05ac";
-		$this->salt			= "b82e36b7de3da17d70f00900c2310640";
 		$this->hash_type	= "sha256";
+		// override defaults with config.
 		if(!empty($conf))
 			{ foreach($conf as $k=>$v) { $this->{$k} = $v; } }
-		$this->default_key = sha1($this->key);
+		// save original key, so set_key() can revert to it
+		$this->default_key 		= $this->key;
 		$this->_mcrypt_exists 	= function_exists('mcrypt_encrypt');
 		$this->_mcrypt_cypher	= MCRYPT_RIJNDAEL_128;
 		$this->_mcrypt_mode		= MCRYPT_MODE_CBC;
@@ -23,24 +24,24 @@ class bolt_encryption
 	// encryption
 	function encrypt($pt)
 	{
-		// make sure the key is 32 chars
-		$key = $this->hash($this->key.$this->salt,'sha1');
-        $is = mcrypt_get_iv_size($this->_mcrypt_cypher, $this->_mcrypt_cypher);
+		// make sure the key is a 32 char hash
+		$key = $this->hash($this->key,'sha1');
+        $is = mcrypt_get_iv_size($this->_mcrypt_cypher, $this->_mcrypt_mode);
         $iv = mcrypt_create_iv($is, MCRYPT_DEV_RANDOM);
-        $ct = mcrypt_encrypt($this->_mcrypt_cypher, $key, $pt, $this->_mcrypt_cypher, $iv);
+        $ct = mcrypt_encrypt($this->_mcrypt_cypher, $key, $pt, $this->_mcrypt_mode, $iv);
         return base64_encode($iv.$ct);
     }
 	function decrypt($ct)
 	{
-		// make sure the key is 32 chars
-		$key = $this->hash($this->key.$this->salt,'sha1');
+		// make sure the key is a 32 char hash
+		$key = $this->hash($this->key,'sha1');
         $ct = base64_decode($ct);
-        $is = mcrypt_get_iv_size($this->_mcrypt_cypher, $this->_mcrypt_cypher);
+        $is = mcrypt_get_iv_size($this->_mcrypt_cypher, $this->_mcrypt_mode);
         if (strlen($ct) < $is)
         	{ throw new Exception('Missing initialization vector'); }
         $iv = substr($ct, 0, $is);
         $ct = substr($ct, $is);
-        $pt = mcrypt_decrypt($this->_mcrypt_cypher, $key, $ct, $this->_mcrypt_cypher, $iv);
+        $pt = mcrypt_decrypt($this->_mcrypt_cypher, $key, $ct, $this->_mcrypt_mode, $iv);
         return rtrim($pt, "\0");
     }
     
@@ -50,7 +51,7 @@ class bolt_encryption
 	function pass($pass,$key=false)
 	{
 		$s=false; $l=1000;
-		$salt = $this->hash($pass.$this->key).$this->hash($key.$this->salt);
+		$salt = $this->hash($pass.$this->key).$this->hash($key);
 		while($l) { $pass = $this->hash(($l%2?$l.$salt.$pass:$pass.$salt.$l)); $l--; }
 		return $pass;
 	}
