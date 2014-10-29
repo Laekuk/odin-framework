@@ -1,5 +1,5 @@
 <?php
-
+#CreatedBy;Aaron;27OCT2014;Odin-Framework
 class brick__freyja extends _thunderbolt
 {
 	var $config;
