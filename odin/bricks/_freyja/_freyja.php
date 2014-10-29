@@ -1,11 +1,22 @@
 <?php
-class brick__freyja extends brick_mortar
+
+class brick__freyja extends _thunderbolt
 {
 	var $config;
 	function __construct($conf)
 	{
 		$this->config	= $conf;
-		$this->set_brick_path(dirname(__FILE__).'/',str_replace('brick_','',__CLASS__));
+		$class_name		= str_replace('brick_','',__CLASS__);
+		$this->_odin_set_conf(
+			array(
+				'paths'				=> array(
+					'lib'				=> dirname(__FILE__).'/',
+				),
+				'prefix'			=> 'mortar_'.$class_name.'_',
+#				'name_is_prefix'	=> TRUE,
+#				'folder_name'		=> $class_name,
+			)
+		);
 	}
 
 	function TOIF($saying=FALSE)
