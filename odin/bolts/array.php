@@ -43,7 +43,7 @@ class bolt_array
 				if(is_string($key) || isset($this->ow_merge_r_opts["preserve_keys"]))
 				{
 					if (is_array($value) && array_key_exists($key, $merged) && is_array($merged[$key]))
-						{ $merged[$key] = call_user_func_array(array($this,__FUNCTION__), array($merged[$key], $value)); }
+						{ $merged[$key] = $this->{__FUNCTION__}($merged[$key], $value); }
 					else
 						{ $merged[$key] = $value; }
 				}

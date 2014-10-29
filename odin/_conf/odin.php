@@ -7,7 +7,7 @@ class conf_odin
 	{
 		$this->paths	= (object) array(
 			"base"			=> $my_dir."/",
-			"configs"		=> $my_dir."/_conf/",
+			"confs"			=> $my_dir."/_conf/",
 			'bolts'		 	=> $my_dir."/bolts/",		#A single classes of code
 			'bricks'	 	=> $my_dir."/bricks/",		#folders of code. usually using multiple bolts, adding their own functionality.
 			'apps'		 	=> $my_dir."/apps/",		#The tenative name for groups of bricks.
