@@ -5,7 +5,10 @@ class bolt_datetime
 	#This will be a wrapper for developers to use the native php datetime class.
 	var $default_tz;
 	function __construct($conf)
-		{ $this->default_tz	= $conf['timezone']; }
+	{
+		$this->default_tz	= $conf['timezone'];
+		date_default_timezone_set($conf['timezone']);
+	}
 
 /*
 Example usage:
@@ -16,10 +19,12 @@ Example usage:
 		array("+25 minutes","America/Anchorage")	#DateTime can also be a string of time to adjust
 	));
 */
-	function diffs($dates)
+	function diffs()
 	{
+		$dates			= func_get_args();
 		$compare_date	= NULL;
 		$compare_date	= $this->make_date_obj(array_shift($dates));
+		$i				= 0;
 		foreach($dates as $date)
 		{
 			$date			= $this->make_date_obj($date);
@@ -43,9 +48,10 @@ Example usage:
 					case 's':	$type='second';	break;
 				}
 			}
-			$outputs[]	= $diff.' '.$type.($diff!==1?'s':'');
+			$outputs[$i]	= $diff.' '.$type.($diff!==1?'s':'');
+			$i++;
 		}
-		return (count($outputs)!==1?$outputs:current($outputs));
+		return ($i!==1?$outputs:current($outputs));
 	}
 	
 	function make_date_obj($date)
@@ -54,13 +60,12 @@ Example usage:
 			{ list($date,$tz)	= $date; }
 		else
 			{ $tz	= $this->default_tz; }
-		$date	= new DateTime($date);
-		$date->setTimezone(new DateTimeZone($tz));
+		$date	= new DateTime($date, new DateTimeZone($tz));
 		return $date;
 	}
 	
 	function date_format($dt,$format)
 	{
-		$this->dt->setTimezone(new DateTimeZone($tz));
+#		$this->dt->setTimezone(new DateTimeZone($tz));
 	}
 }
