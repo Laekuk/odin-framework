@@ -356,18 +356,18 @@
 				$ar_vals	= array_values($o["add_replaces"]);
 				array_walk($ar_keys, $wrap_keys);
 			}
-			foreach($data as $k=>$v)
+			foreach($data as &$v)
 			{
 				foreach($o["add_cols"] as $name=>$string)
 				{
 					#if the column is already set, use its value instead of $string.
-					if(isset($data[$k][$name]))
-						{ $string	= $data[$k][$name]; }
+					if(isset($v[$name]))
+						{ $string	= $v[$name]; }
 					#if there are add_replace key/values, run those first so that if they contain {field_name}s, they will be replaced too.
 					if(isset($ar_keys))
 						{ $string	= str_replace($ar_keys, $ar_vals, $string); }
 					#replace this row's field names with field values
-					$data[$k][$name]	= str_replace($keys, $v, $string);
+					$v[$name]	= str_replace($keys, $v, $string);
 				}
 			}
 		}
