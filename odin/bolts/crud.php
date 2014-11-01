@@ -9,7 +9,7 @@ class bolt_crud
 {
 	var $num_instances	= 0;
 	#pull down columns from a table and display them as a form, end-user may then insert a new record.
-	function create($table,$opts=NULL)
+	function single($table,$opts=NULL)
 	{
 		global $odin;
 		$this->num_instances++;
@@ -110,7 +110,7 @@ class bolt_crud
 	}
 
 	#pull down rows from a table and display them, options to allow the end-user to edit & delete those rows.
-	function manage($table,$opts=NULL)
+	function multi($table,$opts=NULL)
 	{
 		$this->num_instances++;
 		$instance	= (isset($o["instance"])?$o["instance"]:"crud-inst-".$this->num_instances);
