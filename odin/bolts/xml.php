@@ -7,26 +7,26 @@ class bolt_xml
 	{
 /*
 	Its helpful to run this, if your RSS feed is being output to a browser:
-	header('Content-Type: rss2; charset=utf-8', true);
-
+	header('Content-Type: application/rss+xml;');
 
 	example params (see http://static.userland.com/gems/backend/rssTwoExample2.xml for full list of key-value examples):
 		$channel_info		= array(
-			'title'				=> 'Second',
-			'link'				=> 'http://example.com/',
+			'title'				=> 'Example Blog!',
+			'link'				=> 'http://example.com',
 			'description'		=> 'This is my blog!!1j',
 		);
-		$xml_array			= array(
+		$items				= array(
 			array(
-				'title'			=> 'Second',
-				'link'			=> 'http://example.com/blog/',
+				'title'			=> 'First',
+				'link'			=> 'http://example.com/blog/1/',
 				'description'	=> 'This is my first blog ever!',
 				'pubDate'		=> 'Mon, 30 Sep 2002 01:56:02 GMT',
-				'guid'			=> 'http://example.com/blog/second-blog/',
+				'guid'			=> 'http://example.com/blog/1/'
 			),
 			array(
 				'title'			=> 'Second',
-				'link'			=> 'http://example.com/blog/',
+				'link'			=> 'http://example.com/blog/2/',
+				'guid'			=> 'http://example.com/blog/2/'
 			),
 		);
 */
@@ -37,6 +37,10 @@ class bolt_xml
 		$rss_ver	= $dom->createAttribute('version');
 		$rss_ver->value	= '2.0';
 		$rss->appendChild($rss_ver);
+		$atom	= $dom->createAttribute('xmlns:atom');
+		$atom->value	= 'http://www.w3.org/2005/Atom';
+		$rss->appendChild($atom);
+#		<atom:link href="http://dallas.example.com/rss.xml" rel="self" type="application/rss+xml" />
 		
 		$channel	= $dom->createElement('channel');
 		if(!empty($channel_info))
