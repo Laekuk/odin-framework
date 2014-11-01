@@ -88,7 +88,6 @@
 
 		
 		$submit_wrap->appendChild($submit);
-
 		foreach($fields as $name=>$default)
 		{
 			#do we want to add a new (field)set before this field?
@@ -340,10 +339,13 @@
 				"id"				=> $instance,
 			),
 		);
+
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
+
 		if(!empty($o["skip_cols"]))
 			{ $o["skip_cols"]	= array_flip($o["skip_cols"]); }
+
 		if(!empty($o["add_cols"]))
 		{
 			#loop through all $data, adding in those $add_cols to the end, while running str_replace on them.
@@ -423,12 +425,15 @@
 						$th	= $dom->createElement("th",htmlentities(isset($o["headings"][$name])?$o["headings"][$name]:$name));
 						$head_tr->appendChild($th);
 					}
-					#create the <th> tag & fill it with your values.
-					$td					= $dom->createElement("td",htmlentities($value));
-/*
+					#create the <th> tag & fill it with your values, as long as this value is not blank.
 					$td					= $dom->createElement("td");
-					$td->innerHTML		= $value;
-*/
+					if($value)
+					{
+						$td_val				= $dom->createDocumentFragment();
+						$value				= str_replace('&', '&amp;', $value);
+						$td_val->appendXML($value);
+						$td->appendChild($td_val);
+					}
 					$td_classes			= $dom->createAttribute("class");
 					$td_classes->value	= $name;
 					$td->appendChild($td_classes);
