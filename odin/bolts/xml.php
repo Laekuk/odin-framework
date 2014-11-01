@@ -42,7 +42,10 @@ class bolt_xml
 		if(!empty($channel_info))
 		{
 			foreach($channel_info as $k=>$v)
-				{ $channel->appendChild($dom->createElement($k,$v)); }
+			{
+				$ele	= $dom->createElement($k,$v);
+				$channel->appendChild($ele);
+			}
 		}
 		if(!empty($xml_array))
 		{
@@ -52,13 +55,17 @@ class bolt_xml
 				{
 					$item	= $dom->createElement('item');
 					foreach($item_data as $item_key=>$item_value)
-						{ $item->appendChild($dom->createElement($item_key,$item_value)); }
+					{
+						$ele	= $dom->createElement($item_key,$item_value);
+						$item->appendChild($ele);
+					}
 					$channel->appendChild($item);
+					$item	= NULL;
 				}
 			}
 		}
 		$rss->appendChild($channel);
 		$dom->appendChild($rss);
-		return $dom->saveHTML();
+		return $dom->saveXML();
 	}
 }
