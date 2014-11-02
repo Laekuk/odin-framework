@@ -430,8 +430,8 @@
 					if($value)
 					{
 						$td_val				= $dom->createDocumentFragment();
-						if(is_array($value))
-							{ $value	= json_encode($value); }
+						if(is_array($value) || is_object($value))
+							{ $value	= json_encode((array)$value); }
 						$value				= str_replace('&', '&amp;', $value);
 						$td_val->appendXML($value);
 						$td->appendChild($td_val);
