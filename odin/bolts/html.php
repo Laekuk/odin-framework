@@ -3,7 +3,7 @@
  class bolt_html
 {
 	var $num_instances	= 0;
-	#This is an HTML form that allows you to update/edit database data.
+	#This is an HTML form that allows you to update/edit database data. See options for their explination of what they do.
 	function form($fields=NULL,$opts=NULL)
 	{
 		global $odin;
@@ -322,6 +322,7 @@
 		return $dom->saveHTML();
 	}
 	
+	#return a string of html that is a table. $data is the tabular data you want to load in. It can either be an array or an object.
 	function table($data,$opts=NULL)
 	{
 		global $odin;
