@@ -1,13 +1,15 @@
 <?
+#CreatedBy;Weston;30DEC2014;Odin-Framework
 class bolt_encryption
 {
+	var $key;
+	var $hash_type;
 	function __construct($conf)
 	{
-		$this->key			= "e193dd5cfbc8fc80609e406f992e05ac";
-		$this->hash_type	= "sha256";
-		// override defaults with config.
-		if(!empty($conf))
-			{ foreach($conf as $k=>$v) { $this->{$k} = $v; } }
+		#load configs or set defaults
+		$this->key			= (isset($conf['key'])?$conf['key']:'e193dd5cfbc8fc80609e406f992e05ac');
+		$this->hash_type	= (isset($conf['hash_type'])?$conf['hash_type']:'sha256');
+
 		// save original key, so set_key() can revert to it
 		$this->default_key 		= $this->key;
 		$this->_mcrypt_exists 	= function_exists('mcrypt_encrypt');
