@@ -34,6 +34,6 @@ class bolt_couchbase
 		if($debug)
 			{ $o['return_all']	= 1; }
 		$ret	= $odin->curl->request($uri,$o);
-		return json_decode($ret,TRUE);
+		return json_decode($ret);
 	}
 }
