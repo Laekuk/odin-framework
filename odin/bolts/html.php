@@ -349,7 +349,7 @@
 		if(!empty($o["add_cols"]))
 		{
 			#loop through all $data, adding in those $add_cols to the end, while running str_replace on them.
-			$keys		= array_keys(current($data));
+			$keys		= array_keys(current((array)$data));
 			$wrap_keys	= function(&$val){ $val	= "{".$val."}"; };
 			array_walk($keys, $wrap_keys);
 			if(!empty($o["add_replaces"]))
@@ -430,6 +430,8 @@
 					if($value)
 					{
 						$td_val				= $dom->createDocumentFragment();
+						if(is_array($value))
+							{ $value	= json_encode($value); }
 						$value				= str_replace('&', '&amp;', $value);
 						$td_val->appendXML($value);
 						$td->appendChild($td_val);
