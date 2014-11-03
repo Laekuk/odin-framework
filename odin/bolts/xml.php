@@ -3,7 +3,7 @@
 class bolt_xml
 {
 	// strip all non alpha numeric characters
-	function make_rss2($channel_info,$xml_array)
+	function gen_rss2($channel_info,$xml_array)
 	{
 /*
 	Its helpful to run this, if your RSS feed is being output to a browser:
