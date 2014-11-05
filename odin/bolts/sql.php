@@ -64,7 +64,8 @@ class bolt_sql
 
 		#parse the sql statement and get its type.
 		$sql		= ltrim($sql);
-		$qry_type	= preg_split("/[\s]+/",$sql,2)[0];
+		$qry_type	= preg_split("/[\s]+/",$sql,2);
+		$qry_type	= $qry_type[0];
 
 		#grab a local function-scope version of the active database connection.
 		$c	= $this->conns[$this->cur_conn];
