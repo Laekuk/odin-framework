@@ -9,6 +9,7 @@
 		global $odin;
 		$this->num_instances++;
 		$instance	= (isset($opts["instance"])?$opts["instance"]:"inst-".$this->num_instances);
+		$req_uri	= preg_split("/[\?]+/",$_SERVER["REQUEST_URI"],2);
 		$o			= array(
 			"set_element"		=> "fieldset",			#the "set" element, defaulted to <fieldset>.
 			"set_class"			=> "",					#string of all classes you want to put on each set element
@@ -30,9 +31,10 @@
 			"form_attrs"		=> array(				#an array(attr=>value,..) of all form attributes
 				"id"				=> $instance,											#gives the form an id of its $instance
 				"method"			=> "post",												#post by default
-				"action"			=> preg_split("/[\?]+/",$_SERVER["REQUEST_URI"],2)[0],	#by default, use the current url, exlucing any $_GET variables.
+				"action"			=> $req_uri[0],	#by default, use the current url, exlucing any $_GET variables.
 			),
 		);
+		unset($req_uri);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
 		#if fields were not passed, return false
