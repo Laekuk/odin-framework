@@ -241,6 +241,9 @@
 							$checked->value	= "checked";
 							$input->appendChild($checked);
 						}
+						$value		= $dom->createAttribute("value");
+						$value->value	= "1";
+						$input->appendChild($value);
 					}
 				break;
 			}
