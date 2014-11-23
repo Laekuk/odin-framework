@@ -167,8 +167,8 @@
 						#check it on if this option's value matches the field's default value.
 						if($value==$default || (is_array($default) && in_array($value, $default)))
 						{
-							$checked		= $dom->createAttribute("checked");
-							$checked->value	= "checked";
+							$checked		= $dom->createAttribute("selected");
+							$checked->value	= "selected";
 							$option->appendChild($checked);
 						}
 						$input->appendChild($option);
