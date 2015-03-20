@@ -2,8 +2,10 @@
 #CreatedBy;Aaron;11OCT2014;Odin-Framework
 class bolt_sql
 {
+	var $conn_info;
 	var $cur_conn;
 	var $conns;
+	var $conn_cache;
 	function __construct($conf)
 	{
 		$this->conn_info	= $conf->connections;
@@ -74,7 +76,8 @@ class bolt_sql
 
 		#if there are params, run this as a prepared statement, otherwise run as a normal query-string.
 		$r	= $c->prepare($sql);
-		$e	= $r->execute((is_array($params)?$params:NULL));
+		try{ $e	= $r->execute((is_array($params)?$params:NULL)); }
+		catch(Exception $err){ $e=FALSE; }
 		#if $r fails, return sql error
 		if(!$e)
 		{
@@ -131,5 +134,37 @@ class bolt_sql
 			break;
 		}
 		return $ret;
+	}
+	
+	function create_tables($tables=[])
+	{
+		if(!is_array($tables))
+			{ return FALSE; }
+		$cur_conn	= $this->cur_conn;
+		if(!isset($this->conn_cache))
+			{ $this->conn_cache[$cur_conn]			= FALSE; }
+		elseif(!isset($this->conn_cache[$cur_conn]))
+			{ $this->conn_cache[$cur_conn]	= FALSE; }
+
+		if(!isset($this->conn_cache[$cur_conn]['tables']))
+		{
+			$this->conn_cache[$cur_conn]['tables']	= [];
+			$get_tables_sql	= 'SHOW TABLES IN `'.$this->conn_info[$cur_conn]['params']['dbname'].'`';
+			$cur_tables	= $this->qry($get_tables_sql);
+			if(is_array($cur_tables))
+			{
+				foreach($cur_tables as $tbl)
+					{ $this->conn_cache[$cur_conn]['tables'][]	= current($tbl); }
+			}
+		}
+
+		foreach($tables as $table=>$query)
+		{
+			if(!in_array($table, $this->conn_cache[$cur_conn]['tables']))
+			{
+				$ret	= $this->qry($query);
+				$this->conn_cache[$cur_conn]['tables'][]	= $table;
+			}
+		}
 	}
 }
