@@ -1,6 +1,6 @@
 <?php
 #CreatedBy;Aaron;11OCT2014;Odin-Framework
- class bolt_html
+class bolt_html
 {
 	var $num_instances	= 0;
 	#This is an HTML form that allows you to update/edit database data. See options for their explination of what they do.
@@ -9,7 +9,7 @@
 		global $odin;
 		$this->num_instances++;
 		$instance	= (isset($opts['instance'])?$opts['instance']:'inst-'.$this->num_instances);
-		$req_uri	= preg_split('/[\?]+/',$_SERVER['REQUEST_URI'],2);
+		$req_uri	= htmlentities($_SERVER['REQUEST_URI']);
 		$o			= array(
 			'set_element'		=> 'fieldset',			#the 'set' element, defaulted to <fieldset>.
 			'set_class'			=> '',					#string of all classes you want to put on each set element
@@ -31,7 +31,7 @@
 			'form_attrs'		=> array(				#an array(attr=>value,..) of all form attributes
 				'id'				=> $instance,											#gives the form an id of its $instance
 				'method'			=> 'post',												#post by default
-				'action'			=> $req_uri[0],	#by default, use the current url, exlucing any $_GET variables.
+				'action'			=> $req_uri,		#by default, use the current url, encoded just incase of any $_GET variables.
 			),
 		);
 		unset($req_uri);
