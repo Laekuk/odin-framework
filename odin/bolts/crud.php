@@ -19,7 +19,7 @@ class bolt_crud
 		$o	= array(
 			'form_labels'		=> array('Add'),	#the form's label
 			'submit_text'		=> 'Add',			#the copy that goes on the submit button
-			'beautify_headings'	=> NULL,			#a boolean to determine if we'll beautify the headings
+			'beautify_headings'	=> TRUE,			#a boolean to determine if we'll beautify the headings
 			'supress_cols'		=> NULL,			#an array of columns to hide on the insert form
 			'locked_vals'		=> NULL,			#an array of columns & their forced values. This also hides the columns by default (overwritten by col_types)
 			'defaults'			=> NULL,			#an array of columns & their default values, which overwrites the database-default-guesses
@@ -58,17 +58,21 @@ class bolt_crud
 		$sql	= "DESCRIBE `$table`";
 		$fields	= $odin->sql->qry($sql,NULL,'Field');
 		$fields	= $this->parse_fields($fields);
+
+		if($o['beautify_headings'])
+			{ $fields['headings']	= $odin->str->beautify($fields['headings']); }
+
 		if($o['defaults'])
 			{ $fields['fields']	= $odin->array->ow_merge_r($fields['fields'],$o['defaults']); }
 		if($o['col_types'])
 			{ $fields['types']	= $odin->array->ow_merge_r($fields['types'],$o['col_types']); }
 		if($o['headings'])
-			{ $fields['types']	= $odin->array->ow_merge_r($fields['headings'],$o['headings']); }
+			{ $fields['headings']	= $odin->array->ow_merge_r($fields['headings'],$o['headings']); }
 		if($o['col_options'])
 			{ $fields['options']	= $odin->array->ow_merge_r($fields['options'],$o['col_options']); }
-
 		if($o['col_rules'])
 			{ $fields['rules']	= $odin->array->ow_merge_r($fields['rules'],$o['col_rules']); }
+
 		
 		if(isset($_REQUEST[$instance]))
 		{
@@ -95,7 +99,7 @@ class bolt_crud
 					#update database field.
 
 					#prevent html modification attempts
-					if($info['data'][$fields['primary']]!==$opts['id'])
+					if(!isset($info['data'][$fields['primary']]) || $info['data'][$fields['primary']]!==$opts['id'])
 						{ $info['data'][$fields['primary']]	= $opts['id']; }
 					$update	= $odin->qdb->update($table,$info['data'],$fields['primary']);
 					if(!$update)
@@ -150,6 +154,7 @@ class bolt_crud
 			'legends'		=> $o['form_labels'],
 			'new_set_on'	=> $o['new_set_on'],
 			'instance'		=> $o['instance'],
+			'headings'		=> $fields['headings'],
 			'field_types'	=> $fields['types'],
 			'field_opts'	=> $fields['options'],
 			'hide_fields'	=> $hide_fields,
@@ -160,6 +165,7 @@ class bolt_crud
 		return $form;
 	}
 
+/*
 	#pull down rows from a table and display them, options to allow the end-user to edit & delete those rows.
 	function multi($table,$opts=NULL)
 	{
@@ -184,6 +190,7 @@ class bolt_crud
 		);
 	}
 	
+*/
 	function parse_fields($fields)
 	{
 		global $odin;
@@ -191,13 +198,14 @@ class bolt_crud
 		$type		= NULL;
 		$rules		= NULL;
 		$default	= NULL;
+		$options	= NULL;
 		if(empty($fields))
 			{ return FALSE; }
 
 		foreach($fields as $k=>$v)
 		{
 			$field[$k]		= NULL;
-			$heading[$k]	= ucwords($odin->str->alpha_num($k));
+			$heading[$k]	= $odin->str->alpha_num($k);
 			if($v['Key']=='PRI')
 				{ $primary	= $k; }
 			#parse the field's data-type & information.
@@ -217,9 +225,7 @@ class bolt_crud
 					else
 						{ $type[$k]	= 'checkbox'; }
 					#force an integer type
-					$rules[$k]	= array(
-						array('callback'=>'is_numeric','fix_value'=>0),
-					);
+					$rules[$k]	= array('callback'=>'is_numeric','fix_value'=>0);
 				break;
 				case 'enum':
 					$type[$k]		= 'select';
@@ -307,7 +313,7 @@ Valid Rule Options:
 						case isset($rule['set']):
 							$data_val	= $rule['set'];
 						break;
-						case isset($rule['skip']):
+						case $rule==='skip' || isset($rule['skip']):
 							$skip	= TRUE;
 						break;
 						case isset($rule['callback']):
