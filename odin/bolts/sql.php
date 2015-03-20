@@ -113,6 +113,9 @@ class bolt_sql
 							}
 						}
 					break;
+					case 'INSERT':
+						$ret	= $c->lastInsertId();
+					break;
 				}
 				#catch blank values.
 				if(empty($ret))
