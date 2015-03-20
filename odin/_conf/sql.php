@@ -1,7 +1,7 @@
 <?php
 #11OCT2014;AaronPeloquin;Odin-Framework
 $conf	= (object)array(
-	"default_conn"	=> NULL,#"local_mysql",
+	"default_conn"	=> NULL,#"generic_local_mysql",
 	"connections"	=> array(
 		"generic_local_mysql"		=> array(
 			"type"				=> "mysql",
