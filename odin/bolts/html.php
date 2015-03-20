@@ -115,7 +115,8 @@
 			$type		= (isset($o['field_types'][$name])?$o['field_types'][$name]:'text');
 			#re/set this flag that says if this is one or many fields we're working with for this one 'input'.
 			$multifields= FALSE;
-			$label_last	= FALSE;
+			$label_last	= NULL;
+			$input		= NULL;
 			switch($type)
 			{
 				#catch-all for any field-types.
@@ -217,8 +218,11 @@
 							}
 
 							#create a <label> for this option
-							$opt_label	= $dom->createElement('label');
-							$name_span	= $dom->createElement('span',htmlentities($label));
+							$opt_label			= $dom->createElement('label');
+							$name_span			= $dom->createElement('span',htmlentities($label));
+							$title_class		= $dom->createAttribute('class');
+							$title_class->value	= 'title';
+							$name_span->appendChild($title_class);
 							#add the input field to the label
 							$opt_label->appendChild($field);
 							#add the field-name (span) to the label
@@ -275,7 +279,10 @@
 					$input->appendChild($dval);
 				}
 				#create a span with the field's name in it and add that into the label tag.
-				$name_span	= $dom->createElement('span',htmlentities(isset($o['headings'][$name])?$o['headings'][$name]:$name));
+				$name_span			= $dom->createElement('span',htmlentities(isset($o['headings'][$name])?$o['headings'][$name]:$name));
+				$title_class		= $dom->createAttribute('class');
+				$title_class->value	= 'title';
+				$name_span->appendChild($title_class);
 				if($label_last)
 				{
 					#add the input to the label
