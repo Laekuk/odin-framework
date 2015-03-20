@@ -274,7 +274,7 @@
 					$input->appendChild($dval);
 				}
 				#create a span with the field's name in it and add that into the label tag.
-				$name_span	= $dom->createElement("span",htmlentities(isset($o["headings"][$name])?:$name));
+				$name_span	= $dom->createElement("span",htmlentities(isset($o["headings"][$name])?$o["headings"][$name]:$name));
 				if($label_last)
 				{
 					#add the input to the label
