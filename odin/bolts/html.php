@@ -26,6 +26,8 @@ class bolt_html
 			'field_types'		=> array(),				#an array(field=>select,field=>texarea) of field types (select, textarea, etc-).
 															#This defaults to a type of 'text' if unset for any fields
 			'field_opts'		=> array(),				#any field options (select <options>, or a checkbox/radio groups options)
+			'errors'			=> array(),				#an array(field=>select,field=>texarea) of field errors, if there are any.
+			'messages'			=> array(),				#an array(field=>select,field=>texarea) of field messages, if there are any.
 			'hide_fields'		=> array(),				#an array(field,..) of fields to hide (they will still be in your $_REQUEST ($_POST+$_GET) vars
 			'headings'			=> array(),				#an array(field=>string,..) of headings with 
 			'form_attrs'		=> array(				#an array(attr=>value,..) of all form attributes
@@ -88,7 +90,6 @@ class bolt_html
 		$attr->value		= 'hidden-elements';
 		$hidden_wrap->appendChild($attr);
 
-		
 		$submit_wrap->appendChild($submit);
 		foreach($fields as $name=>$default)
 		{
@@ -107,7 +108,7 @@ class bolt_html
 					$legend			= $dom->createElement('legend',htmlentities(is_array($o['legends'])?array_shift($o['legends']):$o['legends']));
 					$set->appendChild($legend);
 				}
-				
+
 				$wrapper			= $dom->createElement($o['wrap_element']);
 				$set->appendChild($wrapper);
 			}
@@ -257,6 +258,27 @@ class bolt_html
 			$el_class	= $dom->createAttribute('class');
 			$el_class->value = 'ft-'.$type.' f-'.$name;
 			$element->appendChild($el_class);
+
+			#Add errors into markup, if they exist.
+			if(isset($o['errors'][$name]))
+			{
+				$errors				= $o['errors'][$name];
+				if(!is_array($errors))
+					{ $errors		= [$errors]; }
+
+				$error_ul			= $dom->createElement('ul');
+				$error_class		= $dom->createAttribute('class');
+				$error_class->value	= 'error';
+				$error_ul->appendChild($error_class);
+
+				foreach($errors as $err)
+				{
+					$error_li		= $dom->createElement('li',htmlentities($err));
+					$error_ul->appendChild($error_li);
+				}
+				$element->appendChild($error_ul);
+			}
+
 			#is this a single-field attribute?
 			if(!$multifields)
 			{
@@ -326,6 +348,24 @@ class bolt_html
 		}
 
 		#Add the remaining dom elements to the output
+		if(isset($o['messages']['_general']))
+		{
+			$msg_span			= $dom->createElement('span',htmlentities($o['messages']['_general']));
+			$span_class			= $dom->createAttribute('class');
+			$span_class->value	= 'success';
+			$msg_span->appendChild($span_class);
+			$form->appendChild($msg_span);
+		}
+		if(isset($o['errors']['_general']))
+		{
+			$err_span			= $dom->createElement('span',htmlentities($o['errors']['_general']));
+			$span_class			= $dom->createAttribute('class');
+			$span_class->value	= 'error';
+			$err_span->appendChild($span_class);
+			$form->appendChild($err_span);
+		}
+
+
 		$form->appendChild($set);
 		$form->appendChild($hidden_wrap);
 		$form->appendChild($submit_wrap);
