@@ -52,6 +52,7 @@ class bolt_crud
 			'foreign_keys'	=> NULL,			#an array('field'=>array('sql'=>"SELECT * FROM `other_table` WHERE `field`>$value",array(':field'=>5))
 				#Pulls data from that other_table and loads it into this field's options.
 			'hide_pk'		=> TRUE,		#disable to display the primary key as read-only
+			'success_msg'	=> NULL,		#disable to display the primary key as read-only
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
@@ -91,7 +92,7 @@ class bolt_crud
 					else
 					{
 						#set success message
-						$info['msg']['_general']	= 'Successfully Added';
+						$info['msg']['_general']	= ($o['success_msg']?:'Successfully Added');
 					}
 				}
 				else#Update
@@ -107,7 +108,7 @@ class bolt_crud
 					else
 					{
 						#set success message
-						$info['msg']['_general']	= 'Successfully Updated';
+						$info['msg']['_general']	= ($o['success_msg']?:'Successfully Updated');
 					}
 				}
 				#clear post.
@@ -116,12 +117,8 @@ class bolt_crud
 				if($error_hit)
 					{ $info['errors']['_general']	= 'Unable to complete action.'; }
 			}
-			else
-			{
-				#interlace errors into form somehow
-			}
 		}
-		if($opts['id'])
+		if(isset($opts['id']))
 		{
 			#get this row's record
 			$sql		= "SELECT * FROM `$table` WHERE `$fields[primary]`=?";
@@ -154,6 +151,8 @@ class bolt_crud
 			'legends'		=> $o['form_labels'],
 			'new_set_on'	=> $o['new_set_on'],
 			'instance'		=> $o['instance'],
+			'errors'		=> (!empty($info['errors'])?$info['errors']:NULL),
+			'messages'		=> (!empty($info['msg'])?$info['msg']:NULL),
 			'headings'		=> $fields['headings'],
 			'field_types'	=> $fields['types'],
 			'field_opts'	=> $fields['options'],
@@ -225,11 +224,11 @@ class bolt_crud
 					else
 						{ $type[$k]	= 'checkbox'; }
 					#force an integer type
-					$rules[$k]	= array('callback'=>'is_numeric','fix_value'=>0);
+					$rules[$k]	= [['callback'=>'is_numeric','fix_value'=>0]];
 				break;
 				case 'enum':
 					$type[$k]		= 'select';
-					$field_opts	= NULL;
+					$field_opts		= NULL;
 					foreach($field_info as $info_key=>$info_val)
 					{
 						$info_val			= substr($info_val, 1,-1);
@@ -302,13 +301,21 @@ Valid Rule Options:
 		{
 			foreach($field_info['rules'] as $field=>$rules)
 			{
+				$valid	= TRUE;
 				#loop through the rules array in order of their array position
-				$data_val	= $data[$field];
+				$data_val	= (isset($data[$field])?$data[$field]:NULL);
 				foreach($rules as $rule)
 				{
 					$skip	= FALSE;
 					switch(TRUE)
 					{
+						#validate that a field is not empty
+						case isset($rule['not_empty']):
+						case isset($rule['required']):
+							$valid	= !empty(trim($data_val));
+							if(!isset($rule['error']) && !$valid)
+								{ $rule['error']	= 'Required'; }
+						break;
 						#set the posted value to whatever $rule[set] is
 						case isset($rule['set']):
 							$data_val	= $rule['set'];
@@ -317,6 +324,7 @@ Valid Rule Options:
 							$skip	= TRUE;
 						break;
 						case isset($rule['callback']):
+							$valid	= FALSE;
 							if(is_array($rule['callback']))
 							{
 								$method	= array_pop($rule['callback']);
@@ -344,21 +352,23 @@ Valid Rule Options:
 							if(!$valid && isset($rule['invalid_skip']))
 								{ $skip	= TRUE; }
 
-							#handle failed validations
-							if(!$valid && (isset($rule['fix_value']) || $rule['error']))
-							{
-								if(isset($rule['fix_value']))
-									{ $data_val			= $rule['fix_value']; }
-								else
-									{ $errors[$field][]	= $rule['error']; }
-							}
 							#are we going to overwrite data with the validation value?
 							if(!empty($rule['use_returned_value']))
 								{ $data_val	= $valid; }
 						break;
 					}
+					#handle failed validations
+					if(!$valid)# && (isset($rule['fix_value']) || $rule['error']))
+					{
+						if(isset($rule['fix_value']))
+							{ $data_val			= $rule['fix_value']; }
+						elseif(isset($rule['error']))
+							{ $errors[$field][]	= $rule['error']; }
+						else
+							{ $errors[$field][]	= 'Error'; }
+					}
 				}
-				#inject the $data_val back into the $data
+				#unset or inject the $data_val back into $data
 				if($skip)
 					{ unset($data[$field]); }
 				else
