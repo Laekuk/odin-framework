@@ -69,10 +69,12 @@ class bolt_qdb
 	{
 		global $odin;
 		$o		= array(
-			'key'	=> NULL,
-			'id'	=> NULL,
-			'limit'	=> NULL,
-			'order'	=> NULL,
+			'key'			=> NULL,
+			'id'			=> NULL,
+			'limit'			=> NULL,
+			'wheres'		=> NULL,
+			'where_join'	=> 'AND',
+			'order'			=> NULL,
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
@@ -94,12 +96,16 @@ class bolt_qdb
 					$args	= [$o["id"]];
 				}
 			}
+			if($o['wheres'])
+				{ $sql	.= ' WHERE '.implode(' '.$o['where_join'].' ', $o['wheres']); }
 			if($o['order'])
 				{ $sql	.= ' ORDER BY '.$o['order']; }
 			if($o["limit"])
 				{ $sql	.= " LIMIT 0,".(int)$o["limit"]; }
 			return $odin->sql->qry($sql,$args);
 		}
+		if($o['wheres'])
+			{ $sql	.= ' WHERE '.implode(' '.$o['where_join'].' ', $o['wheres']); }
 		if($o['order'])
 			{ $sql	.= ' ORDER BY '.$o['order']; }
 		if($o['limit'])
