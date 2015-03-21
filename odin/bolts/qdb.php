@@ -69,36 +69,41 @@ class bolt_qdb
 	{
 		global $odin;
 		$o		= array(
-			"key"	=> NULL,
-			"id"	=> NULL,
-			"limit"	=> NULL,
+			'key'	=> NULL,
+			'id'	=> NULL,
+			'limit'	=> NULL,
+			'order'	=> NULL,
 		);
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
-		$sql	= "SELECT * FROM ?";
+		$sql	= 'SELECT * FROM `'.$table.'`';
 		$tbl	= array($table);
 		if($o["key"])
 		{
 			if($o["id"])
 			{
-				$sql	.= " WHERE `$key` ";
+				$sql	.= ' WHERE `'.$o['key'].'` ';
 				if(is_array($o["id"]))
 				{
 					$sql	.= "IN(".substr(str_repeat("?,",count($o["id"])), 0, -1).")";
-					$fields	= $tbl+$o["id"];
+					$args	= $o["id"];
 				}
 				else
 				{
 					$sql	.= "=?";
-					$tbl[]	= $o["id"];
+					$args	= [$o["id"]];
 				}
 			}
+			if($o['order'])
+				{ $sql	.= ' ORDER BY '.$o['order']; }
 			if($o["limit"])
 				{ $sql	.= " LIMIT 0,".(int)$o["limit"]; }
-			return $odin->sql->qry($sql,$fields);
+			return $odin->sql->qry($sql,$args);
 		}
-		if($o["limit"])
-			{ $sql	.= " LIMIT 0,".(int)$o["limit"]; }
-		return $odin->sql->qry($sql,$tbl);
+		if($o['order'])
+			{ $sql	.= ' ORDER BY '.$o['order']; }
+		if($o['limit'])
+			{ $sql	.= ' LIMIT 0,'.(int)$o['limit']; }
+		return $odin->sql->qry($sql);
 	}
 }
