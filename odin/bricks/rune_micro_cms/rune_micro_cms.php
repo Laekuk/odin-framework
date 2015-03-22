@@ -38,7 +38,7 @@ class brick_rune_micro_cms extends _thunderbolt
 		}
 		else
 		{
-			$page_name	= str_replace('/', NULL, $page_name);
+			$page_name	= str_replace('/', NULL, rawurldecode($page_name));
 			$page_sql	= 'SELECT * FROM `rune_pages` WHERE `active`=1 AND `name` LIKE ? ORDER BY LENGTH(`name`) LIMIT 1';
 			$page		= $odin->sql->qry($page_sql,['%'.$page_name.'%']);
 		}
@@ -59,10 +59,10 @@ class brick_rune_micro_cms extends _thunderbolt
 		$nav	= '';
 		if(!empty($nav_pages))
 		{
-			$nav	.= '<nav><ul>';
+			$nav	.= '<ul class="nav">';
 			foreach($nav_pages as $item)
-				{ $nav	.= '<li><a href="/'.$item['name'].'/">'.$item['name'].'</a>'; }
-			$nav	.= '</ul></nav>';
+				{ $nav	.= '<li class="page-'.$item['content_id'].'"><a href="/'.rawurlencode($item['name']).'/">'.$item['name'].'</a>'; }
+			$nav	.= '</ul>';
 		}
 
 		$template	= file_get_contents($this->config->base_dir.'template/template.html');
