@@ -104,7 +104,7 @@ class brick_rune_micro_cms extends _thunderbolt
 					$content	= $this->admin_pages->snippets();
 				break;
 				case 'tools':
-					$content	= 'Tools';
+					$content	= $this->admin_pages->tools();
 				break;
 				case 'logout':
 					unset($_SESSION['odin_rune_micro_cms_pass']);
@@ -272,6 +272,22 @@ class brick_rune_micro_cms extends _thunderbolt
 
 			file_put_contents($this->config->active_dir.'/.htaccess',
 '#Rune Micro-CMS autocreated .htaccess file
+#Compress Transfers
+<ifModule mod_gzip.c>
+mod_gzip_on Yes
+mod_gzip_dechunk Yes
+mod_gzip_item_include file .(html?|txt|css|js|php|pl)$
+mod_gzip_item_include handler ^cgi-script$
+mod_gzip_item_include mime ^text/.*
+mod_gzip_item_include mime ^application/x-javascript.*
+mod_gzip_item_exclude mime ^image/.*
+mod_gzip_item_exclude rspheader ^Content-Encoding:.*gzip.*
+</ifModule>
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript
+</IfModule>
+
+#URL Redirection
 RewriteEngine On
 #Handle Homepage (always the lowest page)
 RewriteRule ^()$ '.$base_path.'/rune.php [L,QSA]
