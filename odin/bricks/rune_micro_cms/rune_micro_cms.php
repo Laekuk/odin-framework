@@ -65,8 +65,26 @@ class brick_rune_micro_cms extends _thunderbolt
 			$nav	.= '</ul>';
 		}
 
-		$template	= file_get_contents($this->config->base_dir.'template/template.html');
-		$html		= str_replace(['{content}','{name}','{nav}'], [$page['content'],$page['name'],$nav], $template);
+		$template_dir	= $this->config->base_dir.'template/';
+		$template		= file_get_contents($template_dir.'template.html');
+		$template_dir	= str_replace($_SERVER['DOCUMENT_ROOT'], '',$template_dir);
+		$html_name		= strtolower(preg_replace('/[^0-9a-zA-Z ]/m', ' ', $page['name']));
+		$html_name		= preg_replace("/ /", "-", $html_name);
+		$html			= str_replace([
+			'{content}',
+			'{name}',
+			'{html_name}',
+			'{nav}',
+			'{css}',
+			'{js}',
+		],[
+			$page['content'],
+			$page['name'],
+			$html_name,
+			$nav,
+			$template_dir.'styles.css',
+			$template_dir.'scripts.js',
+		], $template);
 		$snippets	= $odin->sql->qry('SELECT * FROM `rune_snippets` WHERE LENGTH(`value`)>0');
 		if(is_array($snippets))
 		{
@@ -97,8 +115,8 @@ class brick_rune_micro_cms extends _thunderbolt
 					$content	= $this->admin_pages->home();
 				break;
 				case 'template':
-					$template_file	= $this->config->base_dir.'template/template.html';
-					$content		= $this->admin_pages->template($template_file);
+					$template_dir	= $this->config->base_dir.'template/';
+					$content		= $this->admin_pages->template($template_dir);
 				break;
 				case 'snippets':
 					$content	= $this->admin_pages->snippets();
@@ -154,6 +172,7 @@ class brick_rune_micro_cms extends _thunderbolt
 			.success{color:green;}
 			.bold{font-weight:bold;}
 			table{width:100%;}
+			.ace_editor{border:1px solid;}
 
 		/* navigation styles */
 			nav ul{list-style:none;height:24px;margin:0;padding:0;}
@@ -199,6 +218,32 @@ class brick_rune_micro_cms extends _thunderbolt
 					editor.getSession().setValue(html.val());
 					editor.getSession().on("change", function(){
 						html.val(editor.getSession().getValue());
+					});
+				}
+
+				var css		= $(".f-CSS textarea");
+				if(css.length>0)
+				{
+					css.hide().after("<div id=\"css-editor\"></div>");
+					$("#css-editor").css("height","300px");
+					var css_editor = ace.edit("css-editor");
+					css_editor.getSession().setMode("ace/mode/css");
+					css_editor.getSession().setValue(css.val());
+					css_editor.getSession().on("change", function(){
+						css.val(css_editor.getSession().getValue());
+					});
+				}
+
+				var js		= $(".f-JavaScript textarea");
+				if(js.length>0)
+				{
+					js.hide().after("<div id=\"js-editor\"></div>");
+					$("#js-editor").css("height","300px");
+					var js_editor = ace.edit("js-editor");
+					js_editor.getSession().setMode("ace/mode/javascript");
+					js_editor.getSession().setValue(js.val());
+					js_editor.getSession().on("change", function(){
+						js.val(js_editor.getSession().getValue());
 					});
 				}
 			});
@@ -261,6 +306,18 @@ class brick_rune_micro_cms extends _thunderbolt
 	</body>
 </html>');
 		}
+
+		#Create CSS File.
+		$css_file	= $this->config->base_dir.'template/styles.css';
+		if(!file_exists($css_file))
+			{ file_put_contents($css_file,'/* CSS File. Use {css} to inject into your HTML template. */
+'); }
+
+		#Create JS File.
+		$js_file	= $this->config->base_dir.'template/scripts.js';
+		if(!file_exists($js_file))
+			{ file_put_contents($js_file,'/* JavaScript File. Use {js} to inject into your HTML template. */
+'); }
 
 		if(!file_exists($this->config->active_dir.'/.htaccess'))
 		{
