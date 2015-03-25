@@ -33,26 +33,62 @@ class mortar_rune_micro_cms_admin_pages
 		return $edit_form;
 	}
 
-	function template($template_file)
+	function template($template_dir)
 	{
 		global $odin;
+		$form_messages	= [];
+		$template_file	= $template_dir.'template.html';
+		$css_file		= $template_dir.'styles.css';
+		$js_file		= $template_dir.'scripts.js';
+
 		if(!is_writable($template_file))
 			{ return '<p class="error">Your template file ('.$template_file.') is not writable.</p>'; }
+		if(!is_writable($css_file))
+			{ return '<p class="error">Your CSS file ('.$css_file.') is not writable.</p>'; }
+		if(!is_writable($js_file))
+			{ return '<p class="error">Your template file ('.$js_file.') is not writable.</p>'; }
+
 		$form_opts	= [
 			'instance'		=> 'edit-template',
 			'legends'		=> ['Update Template'],
 			'submit_text'	=> 'Save Template',
-			'field_types'	=> ['HTML'=>'textarea'],
+			'field_types'	=> [
+				'HTML'			=> 'textarea',
+				'CSS'			=> 'textarea',
+				'JavaScript'	=> 'textarea',
+			],
 		];
+
+		#Update HTML File.
 		if(!empty($_POST['edit-template']['HTML']))
 		{
 			$content	= $_POST['edit-template']['HTML'];
 			file_put_contents($template_file, $content);
-			$form_opts['messages']['_general']	= 'Template Updated';
-			
+			$form_messages[]	= 'HTML Template Updated';
 		}
-		$content	= file_get_contents($template_file);
-		$form	= $odin->html->form(['HTML'=>$content],$form_opts);
+
+		#Update CSS File.
+		if(!empty($_POST['edit-template']['CSS']))
+		{
+			$content	= $_POST['edit-template']['CSS'];
+			file_put_contents($css_file, $content);
+			$form_messages[]	= 'CSS Updated';
+		}
+
+		#Update Javascript File.
+		if(!empty($_POST['edit-template']['JavaScript']))
+		{
+			$content	= $_POST['edit-template']['JavaScript'];
+			file_put_contents($js_file, $content);
+			$form_opts['messages']['_general']	= 'JavaScript Updated';
+		}
+		if(!empty($form_messages))
+			{ $form_opts['messages']['_general']	= implode(', ', $form_messages); }
+		$form	= $odin->html->form([
+			'HTML'			=> file_get_contents($template_file),
+			'CSS'			=> file_get_contents($css_file),
+			'JavaScript'	=> file_get_contents($js_file),
+		],$form_opts);
 		return $form;
 	}
 
@@ -108,7 +144,10 @@ class mortar_rune_micro_cms_admin_pages
 	function _sidebar()
 	{
 		global $odin;
-		return $this->_list_pages().$this->_list_snippets();
+		return
+			$this->_list_pages().
+			$this->_core_snippets().
+			$this->_list_snippets();
 	}
 
 	function _list_pages()
@@ -144,6 +183,30 @@ class mortar_rune_micro_cms_admin_pages
 		]);
 
 		return '<p><i class="fa fa-plus success"></i> <a href="?p=content&id=new">Create New Page</a></p>'.$page_links;
+	}
+
+	function _core_snippets()
+	{
+		return '<h3>Core Snippets</h3>
+		<dl>
+			<dt>{name}</dt>
+			<dd>Writes the name of the current content.</dd>
+
+			<dt>{html_name}</dt>
+			<dd>Writes the name of the current content with no spaces so you can use it as a class or ID in your HTML.</dd>
+
+			<dt>{nav}</dt>
+			<dd>Writes an unordered list of your active content items.</dd>
+
+			<dt>{content}</dt>
+			<dd>Writes the content into each page.</dd>
+
+			<dt>{css}</dt>
+			<dd>Writes the URL of your CSS file.</dd>
+
+			<dt>{js}</dt>
+			<dd>Writes the URL of your JavaScript file.</dd>
+		</dl>';
 	}
 
 	function _list_snippets()
