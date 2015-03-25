@@ -286,6 +286,7 @@ class bolt_crud
 
 /*
 Valid Rule Options:
+	- required					: if set, this is a required field
 	- set						: if set, this will be 
 	- skip						: if set to true, this field will be removed from data.
 	- 'callback'				: either the name of a global function, or a bolt/method combo to call.
