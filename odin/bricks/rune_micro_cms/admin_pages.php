@@ -123,11 +123,6 @@ class mortar_rune_micro_cms_admin_pages
 		return $snippet_html;
 	}
 
-	function tools()
-	{
-		return 'Tools Content';
-	}
-	
 	function _create_page($name='New Page',$sort_order=4)
 	{
 		global $odin;
@@ -220,7 +215,7 @@ class mortar_rune_micro_cms_admin_pages
 		foreach($snippets as &$snip)
 		{
 			$snip['Usage']	= '{'.$snip['name'].'}';
-			$snip['name']	= '<i class="fa fa-pencil-square-o success"></i> <a '.($page_id==$snip['snippet_id']?'class="bold" ':NULL).'href="?p=snippets&snippet_id='.$snip['snippet_id'].'">'.$snip['name'].'</a>';
+			$snip['name']	= '<i class="fa fa-pencil-square-o '.(empty($snip['value'])?'error':'success').'"></i> <a '.($page_id==$snip['snippet_id']?'class="bold" ':NULL).'href="?p=snippets&snippet_id='.$snip['snippet_id'].'">'.$snip['name'].'</a>';
 		}
 		$snippet_str	.= $odin->html->table($snippets,[
 			'caption'	=> 'Snippets',
