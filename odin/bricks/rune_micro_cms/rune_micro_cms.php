@@ -1,5 +1,13 @@
 <?php
 #CreatedBy;Aaron;18MAR2015;Odin-Framework
+/*
+	Basic Setup Example:
+		#Create a file on your web server which is already running odin, then include the odin framework, and write the following code onto that page:
+		echo $odin->brick->rune_micro_cms->admin_panel();
+
+	Modify this brick's config to set a password (users brick coming in the future to midegate this), then navigate to that page you made.
+	The brick will write all of the nesseary template files and database tables to get you started.
+*/
 class brick_rune_micro_cms extends _thunderbolt
 {
 	var $config;
@@ -24,10 +32,11 @@ class brick_rune_micro_cms extends _thunderbolt
 		);
 	}
 
-	function show()
+	function show($page_name=FALSE,$scripts_dir=FALSE)
 	{
 		global $odin;
-		$page_name		= (isset($_GET['pagepath'])?$_GET['pagepath']:FALSE);
+		if(empty($page_name))
+			{ $page_name	= (isset($_GET['pagepath'])?$_GET['pagepath']:FALSE); }
 		if(empty($page_name))
 		{
 			$page	= $odin->qdb->get('rune_pages',[
@@ -68,6 +77,8 @@ class brick_rune_micro_cms extends _thunderbolt
 		$template_dir	= $this->config->base_dir.'template/';
 		$template		= file_get_contents($template_dir.'template.html');
 		$template_dir	= str_replace($_SERVER['DOCUMENT_ROOT'], '',$template_dir);
+		if(empty($scripts_dir))
+			{ $scripts_dir	= $template_dir; }
 		$html_name		= strtolower(preg_replace('/[^0-9a-zA-Z ]/m', ' ', $page['name']));
 		$html_name		= preg_replace("/ /", "-", $html_name);
 		$html			= str_replace([
@@ -82,8 +93,8 @@ class brick_rune_micro_cms extends _thunderbolt
 			$page['name'],
 			$html_name,
 			$nav,
-			$template_dir.'styles.css',
-			$template_dir.'scripts.js',
+			$scripts_dir.'styles.css',
+			$scripts_dir.'scripts.js',
 		], $template);
 		$snippets	= $odin->sql->qry('SELECT * FROM `rune_snippets` WHERE LENGTH(`value`)>0');
 		if(is_array($snippets))
@@ -94,7 +105,7 @@ class brick_rune_micro_cms extends _thunderbolt
 					{ $html	= str_replace('{'.$v['name'].'}', $v['value'], $html); }
 			}
 		}
-		die($html);
+		return $html;
 	}
 
 	function admin_panel()
@@ -122,7 +133,7 @@ class brick_rune_micro_cms extends _thunderbolt
 					$content	= $this->admin_pages->snippets();
 				break;
 				case 'tools':
-					$content	= $this->admin_pages->tools();
+					$content	= $this->tools();
 				break;
 				case 'logout':
 					unset($_SESSION['odin_rune_micro_cms_pass']);
@@ -136,7 +147,6 @@ class brick_rune_micro_cms extends _thunderbolt
 			$nav	=
 				'<li><a href="?p=content">Content</a></li>
 				<li><a href="?p=template">Template</a></li>
-				<li><a href="?p=snippets">Snippets</a></li>
 				<li><a href="?p=tools">Tools</a></li>
 				<li><a href="?p=logout">Logout</a></li>';
 		}
@@ -167,19 +177,27 @@ class brick_rune_micro_cms extends _thunderbolt
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 		<style>
 		/* general styles */
+			*{font-weight:bold;}
+			h1{margin:0;text-align: center;}
 			a{text-decoration:none;}
-			.error{color:red;}
-			.success{color:green;}
-			.bold{font-weight:bold;}
 			table{width:100%;}
 			.ace_editor{border:1px solid;}
 
+		/* color styles */
+			body{background-color:#EEDDBB}
+			nav,aside{background-color:#A1916F}
+			a{color:#003387;}
+			.error{color:#95130C;font-weight:bold;}
+			.success{color:#008733;font-weight:bold;}
+			.bold{font-weight:bold;}
+
 		/* navigation styles */
-			nav ul{list-style:none;height:24px;margin:0;padding:0;}
-			nav ul li{float:left;padding:0 5px;}
+			nav{border-radius: 3px 3px 0 3px;}
+			nav ul{list-style:none;height:24px;margin:0;padding:10px 0 0 0;}
+			nav ul li{float:left;padding:0 10px;}
 
 		/* section styles */
-			section{float:left;width:69%;}
+			section{float:left;width:68%;margin-top:10px;}
 
 			/* form styles */
 				form ul{list-style:none;padding:0;margin:0;}
@@ -191,8 +209,11 @@ class brick_rune_micro_cms extends _thunderbolt
 				.ft-checkbox .title{display:inline;}
 
 		/* side styles */
-			aside{float:right;width:30%;background-color:#DDD;}
-			
+			aside{float:right;width:30%;border-radius:0 0 3px 3px;padding:0 5px 5px 5px}
+
+			/* table styles */
+				aside tr{height:24px;}
+
 		/* responsive styles */
 		@media (max-width: 800px) {
 			section{width: 100%;}
@@ -275,6 +296,93 @@ class brick_rune_micro_cms extends _thunderbolt
 	</body>
 </html>';
 		return $html;
+	}
+
+	function tools()
+	{
+		global $odin;
+		if(isset($_GET['export']))
+		{
+			$template_dir	= $this->config->base_dir.'/template/';
+			switch($_GET['export'])
+			{
+				default:
+					return 'Error: that is not a valid export type.';
+				break;
+				case 'html';
+					if(class_exists('ZipArchive'))
+					{
+						$first			= TRUE;
+						$export_file	= $template_dir.'export.zip';
+						$pages			= $odin->qdb->get('rune_pages',[
+							'order'			=> '`sort_order`',
+							'wheres'		=> ['`active`=1'],
+						]);
+						$zip			= new ZipArchive;
+						if(!empty($pages))
+						{
+							foreach($pages as $page)
+							{
+								$file_contents	= $this->show($page['name'],'/');
+								$tmpfname	= tempnam('/tmp', 'rune');
+								$handle		= fopen($tmpfname, "w");
+								fwrite($handle, $file_contents);
+								fclose($handle);
+								if($first)
+								{
+									#make (or empty) the file.
+									file_put_contents($export_file, '');
+									if($zip->open($export_file) === FALSE)
+										{ die('Error, Cannot write to export file ('.$export_file.')'); }
+									$zip->addFile($tmpfname,'index.html');
+								}
+								$first	= FALSE;
+								$zip->addFile($tmpfname,'/'.$page['name'].'/index.html');
+								#unlink($tmpfname);
+							}
+
+							#add styles.css file
+							$zip->addFile($template_dir.'styles.css','/styles.css');
+
+							#add scripts.js
+							$zip->addFile($template_dir.'scripts.js','/scripts.js');
+						}
+						$zip->close();
+						header('Location: '.str_replace($_SERVER['DOCUMENT_ROOT'], '', $export_file));
+						die();
+					}
+				break;
+				case 'json';
+						$export		= [
+							'page_content'	=> $odin->qdb->get('rune_pages'),
+							'snippets'		=> $odin->qdb->get('rune_snippets'),
+							'template'		=> [
+								'html'			=> file_get_contents($template_dir.'template.html'),
+								'css'			=> file_get_contents($template_dir.'styles.css'),
+								'js'			=> file_get_contents($template_dir.'scripts.js'),
+							]
+						];
+						$export			= json_encode($export);
+						$export_file	= $template_dir.'export.json';
+						file_put_contents($export_file, $export);
+				break;
+			}
+			if(isset($export_file) && !empty($export_file))
+			{
+				header('Location: '.str_replace($_SERVER['DOCUMENT_ROOT'], '', $export_file));
+				die();
+			}
+			die('Error creating export file.');
+		}
+		if(class_exists('ZipArchive'))
+			{ $zip_text	= 'Export as <a download="Website.zip" href="?p=tools&export=html">HTML</a> (zip file)'; }
+		else
+			{ $zip_text	= 'Cannot Export, since <a href="https://php.net/manual/en/zip.examples.php">ZipArchive</a> is not supported.'; }
+		$tools_html	= '<h2>Export Website</h2><ul>
+			<li>'.$zip_text.'</li>
+			<li>Export as <a download="Website.json" href="?p=tools&export=json">JSON</a></li>
+		</ul>';
+		return $tools_html;
 	}
 
 	function _install_cms()
@@ -364,7 +472,7 @@ RewriteRule ^(.*)$ '.$base_path.'/rune.php?pagepath=$1 [L,QSA]');
 			file_put_contents($this->config->active_dir.'/rune.php',
 '<?php
 require_once("'.$odin->conf->paths->base.'fury.php");
-$odin->brick->rune_micro_cms->show();
+echo $odin->brick->rune_micro_cms->show();
 ');
 		}
 	}
