@@ -20,8 +20,12 @@ This framework is intended to run on an Apache server (for now) in PHP v5.6
 <h2>Examples</h2>
 <h3>Calling a class (bolt) method</h3>
 <strong>$odin</strong>->array->overwrite_merge_recursive($arrayA,$arrayB);
+<ul>
+	<li><strong>array</strong> is the class (bolt) we are calling</li>
+	<li><strong>overwrite_merge_recursive</strong> is the method inside of the array class that we are calling</li>
+</ul>
 
-<h3>Calling a Brick Method</h3>
+<h3>Calling a Brick-Method</h3>
 <em>#Initializing Rune (Micro-CMS)</em>
 
 <strong>$odin</strong>->brick->rune_micro_cms->admin_panel();
