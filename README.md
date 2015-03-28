@@ -26,7 +26,7 @@ This framework is intended to run on an Apache server (for now) in PHP v5.6
 </ul>
 
 <h3>Calling a Brick-Method</h3>
-<em>#Initializing Rune (Micro-CMS)</em>
+<p>A Brick is a set of code that accomplishes a task all on its own. They are not intended to be entire web-apps all on their own. As a rule of thumb, bricks can use bolts, but bolts should never call bricks.</p><p>The example code below is initializing Rune, a Micro-CMS that is baked into this library.</p>
 
 <strong>$odin</strong>->brick->rune_micro_cms->admin_panel();
 <ul>
