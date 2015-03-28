@@ -184,7 +184,7 @@ class brick_rune_micro_cms extends _thunderbolt
 			.ace_editor{border:1px solid;}
 
 		/* color styles */
-			body{background-color:#EEDDBB}
+			body{background-color:#EEDDBB;background-image:linear-gradient(to bottom left,#EDB,#BA8);}
 			nav,aside{background-color:#A1916F}
 			a{color:#003387;}
 			.error{color:#95130C;font-weight:bold;}
