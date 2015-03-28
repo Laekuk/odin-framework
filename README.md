@@ -20,4 +20,5 @@ This framework is intended to run on an Apache server (for now) in PHP v5.6
 <h2>Example</h2>
 <strong>$odin</strong>->array->overwrite_merge_recursive($arrayA,$arrayB);
 
-<h2><a target="_blank" href="https://docs.google.com/document/d/1LTTfS3iGPjMAc4AlVSuWEC7eVXkOqDE_a141x14AMhg/pub">Future Plans</a></h2>
+<h2>Rune (Micro-CMS)</h2>
+<strong>$odin</strong>->brick->rune_micro_cms->admin_panel();
