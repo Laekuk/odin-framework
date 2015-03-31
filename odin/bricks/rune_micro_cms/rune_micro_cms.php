@@ -32,35 +32,46 @@ class brick_rune_micro_cms extends _thunderbolt
 		);
 	}
 
-	function show($page_name=FALSE,$scripts_dir=FALSE)
+	function show($opts=[])
 	{
 		global $odin;
-		if(empty($page_name))
-			{ $page_name	= (isset($_GET['pagepath'])?$_GET['pagepath']:FALSE); }
-		if(empty($page_name))
+		$o	= [
+				'page_name'		=> FALSE,
+				'content'		=> FALSE,
+				'scripts_dir'	=> FALSE,
+		];
+		if($opts)
+			{ $o	= $odin->array->ow_merge_r($o,$opts); }
+		if(empty($o['content']))
 		{
-			$page	= $odin->qdb->get('rune_pages',[
-				'order'		=> '`sort_order`',
-				'limit'		=> 1,
-				'wheres'	=> ['`active`=1'],
-			]);
+			if(empty($o['page_name']))
+				{ $o['page_name']	= (isset($_GET['pagepath'])?$_GET['pagepath']:FALSE); }
+			if(empty($o['page_name']))
+			{
+				$page	= $odin->qdb->get('rune_pages',[
+					'order'		=> '`sort_order`',
+					'limit'		=> 1,
+					'wheres'	=> ['`active`=1'],
+				]);
+			}
+			else
+			{
+				$o['page_name']	= str_replace('/', NULL, rawurldecode($o['page_name']));
+				$page_sql	= 'SELECT * FROM `rune_pages` WHERE `active`=1 AND `name` LIKE ? ORDER BY LENGTH(`name`) LIMIT 1';
+				$page		= $odin->sql->qry($page_sql,['%'.$o['page_name'].'%']);
+			}
+	
+			if(!is_array($page))
+			{
+				$page	= [[
+					'name'		=> '404',
+					'content'	=> '<p><strong>404</strong>, Page not Found.</p>',
+				]];
+			}
+			$page		= current($page);
 		}
 		else
-		{
-			$page_name	= str_replace('/', NULL, rawurldecode($page_name));
-			$page_sql	= 'SELECT * FROM `rune_pages` WHERE `active`=1 AND `name` LIKE ? ORDER BY LENGTH(`name`) LIMIT 1';
-			$page		= $odin->sql->qry($page_sql,['%'.$page_name.'%']);
-		}
-
-		if(!is_array($page))
-		{
-			$page	= [[
-				'name'		=> '404',
-				'content'	=> '<p><strong>404</strong>, Page not Found.</p>',
-			]];
-		}
-		$page		= current($page);
-
+			{ $page	= $o['content']; }
 		$nav_pages		= $odin->qdb->get('rune_pages',[
 			'wheres'		=> ['`active`=1'],
 			'order'			=> '`sort_order`',
@@ -77,8 +88,8 @@ class brick_rune_micro_cms extends _thunderbolt
 		$template_dir	= $this->config->base_dir.'template/';
 		$template		= file_get_contents($template_dir.'template.html');
 		$template_dir	= str_replace($_SERVER['DOCUMENT_ROOT'], '',$template_dir);
-		if(empty($scripts_dir))
-			{ $scripts_dir	= $template_dir; }
+		if(empty($o['scripts_dir']))
+			{ $o['scripts_dir']	= $template_dir; }
 		$html_name		= strtolower(preg_replace('/[^0-9a-zA-Z ]/m', ' ', $page['name']));
 		$html_name		= preg_replace("/ /", "-", $html_name);
 		$html			= str_replace([
@@ -93,8 +104,8 @@ class brick_rune_micro_cms extends _thunderbolt
 			$page['name'],
 			$html_name,
 			$nav,
-			$scripts_dir.'styles.css',
-			$scripts_dir.'scripts.js',
+			$o['scripts_dir'].'styles.css',
+			$o['scripts_dir'].'scripts.js',
 		], $template);
 		$snippets	= $odin->sql->qry('SELECT * FROM `rune_snippets` WHERE LENGTH(`value`)>0');
 		if(is_array($snippets))
@@ -184,7 +195,7 @@ class brick_rune_micro_cms extends _thunderbolt
 			.ace_editor{border:1px solid;}
 
 		/* color styles */
-			body{background-color:#EEDDBB;background-image:linear-gradient(to bottom left,#EDB,#BA8);}
+			body{background-color:#EEDDBB;}
 			nav,aside{background-color:#A1916F}
 			a{color:#003387;}
 			.error{color:#95130C;font-weight:bold;}
@@ -323,7 +334,10 @@ class brick_rune_micro_cms extends _thunderbolt
 						{
 							foreach($pages as $page)
 							{
-								$file_contents	= $this->show($page['name'],'/');
+								$file_contents	= $this->show([
+									'page_name'		=> $page['name'],
+									'scripts_dir'	=> '/',
+								]);
 								$tmpfname	= tempnam('/tmp', 'rune');
 								$handle		= fopen($tmpfname, "w");
 								fwrite($handle, $file_contents);
