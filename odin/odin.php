@@ -1,7 +1,7 @@
 <?php
 #CreatedBy;Aaron;11OCT2014;Odin-Framework
 #Some more information or like whatever:
-	#https://github.com/Laekuk/odin-framework
+	#hhttps://github.com/aaronpeloquin/odin-frameworkk
 class odin extends _thunderbolt
 {
 	/*
