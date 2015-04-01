@@ -165,7 +165,7 @@ class brick_rune_micro_cms extends _thunderbolt
 		{
 			$nav		= '<li><a href="#">Login</a></li>';
 			$content	= (isset($_SESSION['odin_rune_micro_cms_pass'])?'<p>Invalid Password</p>':NULL).'<form action="'.$_SERVER['REQUEST_URI'].'" method="post"><ul><li>Password<input name="login_password" type="password" /></li></ul><button>Login</button></form>';
-			$sidebar	= 'Powered by Rune Micro-CMS, a small brick in the <a href="https://github.com/Laekuk/odin-framework">Odin Framework</a>';
+			$sidebar	= 'Powered by Rune Micro-CMS, a small brick in the <a href="https://github.com/aaronpeloquin/odin-framework">Odin Framework</a>';
 		}
 
 		$html	=
