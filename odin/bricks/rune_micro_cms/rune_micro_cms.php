@@ -16,11 +16,15 @@ class brick_rune_micro_cms extends _thunderbolt
 		global $odin;
 		$this->config	= $conf;
 		$this->config->base_dir	= dirname(__FILE__).'/';
+		#For now, we're using a plaintext password thats in the config. Its crap, but it'll do until we have a users brick
 		if(empty($this->config->admin_password))
 			{ die('Please set an administrator password in your config file.'); }
+		#Create required nessesary MySQL database files
 		$this->_create_tables();
+		#Create required files
 		$this->_install_cms();
 
+		#Set the configs for _thunderbolt
 		$class_name		= str_replace('brick_','',__CLASS__);
 		$this->_odin_set_conf(
 			array(
@@ -32,22 +36,27 @@ class brick_rune_micro_cms extends _thunderbolt
 		);
 	}
 
+	#Call this method with no options to show the CMS
 	function show($opts=[])
 	{
 		global $odin;
 		$o	= [
-				'page_name'		=> FALSE,
-				'content'		=> FALSE,
-				'scripts_dir'	=> FALSE,
+				'content'		=> FALSE,	#If you pass HTML content into this setting it will load that instead of any normal page content it would've shown
+				'page_name'		=> FALSE,	#This is the page you want to display, leave blank if you want .htaccess to control the pages with a $_GET variable
+				'scripts_dir'	=> FALSE,	#Overwrite the normal HTML path of your JavaScript & CSS files
 		];
+		#Merge options with defaults.
 		if($opts)
 			{ $o	= $odin->array->ow_merge_r($o,$opts); }
+		#If we don't have any HTML content passed, load page from the database
 		if(empty($o['content']))
 		{
+			#Get the page_name from the $_GET if it wasn't passed
 			if(empty($o['page_name']))
 				{ $o['page_name']	= (isset($_GET['pagepath'])?$_GET['pagepath']:FALSE); }
 			if(empty($o['page_name']))
 			{
+				#If we still don't have a page_name, load the CMS's homepage.
 				$page	= $odin->qdb->get('rune_pages',[
 					'order'		=> '`sort_order`',
 					'limit'		=> 1,
@@ -56,11 +65,13 @@ class brick_rune_micro_cms extends _thunderbolt
 			}
 			else
 			{
+				#Otherwise, try to pull the page we're looking for
 				$o['page_name']	= str_replace('/', NULL, rawurldecode($o['page_name']));
 				$page_sql	= 'SELECT * FROM `rune_pages` WHERE `active`=1 AND `name` LIKE ? ORDER BY LENGTH(`name`) LIMIT 1';
 				$page		= $odin->sql->qry($page_sql,['%'.$o['page_name'].'%']);
 			}
-	
+
+			#If there is no page found, show a 404 message
 			if(!is_array($page))
 			{
 				$page	= [[
@@ -72,10 +83,12 @@ class brick_rune_micro_cms extends _thunderbolt
 		}
 		else
 			{ $page	= $o['content']; }
+		#Pull the pages we need for the navigation
 		$nav_pages		= $odin->qdb->get('rune_pages',[
 			'wheres'		=> ['`active`=1'],
 			'order'			=> '`sort_order`',
 		]);
+		#Build the navigation replace variable
 		$nav	= '';
 		if(!empty($nav_pages))
 		{
@@ -85,6 +98,7 @@ class brick_rune_micro_cms extends _thunderbolt
 			$nav	.= '</ul>';
 		}
 
+		#Build this page's HTML, starting with the base template
 		$template_dir	= $this->config->base_dir.'template/';
 		$template		= file_get_contents($template_dir.'template.html');
 		$template_dir	= str_replace($_SERVER['DOCUMENT_ROOT'], '',$template_dir);
@@ -92,6 +106,7 @@ class brick_rune_micro_cms extends _thunderbolt
 			{ $o['scripts_dir']	= $template_dir; }
 		$html_name		= strtolower(preg_replace('/[^0-9a-zA-Z ]/m', ' ', $page['name']));
 		$html_name		= preg_replace("/ /", "-", $html_name);
+		#Replace the base CMS snippets
 		$html			= str_replace([
 			'{content}',
 			'{name}',
@@ -107,6 +122,7 @@ class brick_rune_micro_cms extends _thunderbolt
 			$o['scripts_dir'].'styles.css',
 			$o['scripts_dir'].'scripts.js',
 		], $template);
+		#Attempt to insert all custom replace snippets
 		$snippets	= $odin->sql->qry('SELECT * FROM `rune_snippets` WHERE LENGTH(`value`)>0');
 		if(is_array($snippets))
 		{
@@ -119,6 +135,7 @@ class brick_rune_micro_cms extends _thunderbolt
 		return $html;
 	}
 
+	#Call this method to show the administration panel for editing the template, snippets, and pages
 	function admin_panel()
 	{
 		if(!isset($_SESSION))
