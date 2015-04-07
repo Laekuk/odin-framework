@@ -11,7 +11,10 @@ class bolt_sql
 		$this->conn_info	= $conf->connections;
 		#if there is a default connection, autoconnect.
 		if($conf->default_conn)
-			{ $this->connect($conf->default_conn); }
+		{
+			if(!$this->connect($conf->default_conn))
+				{ die('Database Server Offline or permission is denied.'); }
+		}
 	}
 
 	function connect($conn_name)
