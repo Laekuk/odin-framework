@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+	RewriteEngine on
+	#Accounts for all files that already exist.
+	RewriteCond %{REQUEST_FILENAME} !-f
+	#Accounts for all directories that already exist.
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_FILENAME} !-l
+	
+	# Main URL rewriting.
+	RewriteRule ^(.*)$ index.php?_uri=$1 [L,QSA]
+	
+	# Home URL rewriting
+	#RewriteRule ^home(.*)$ /index.php?_uri=$1 [L,QSA]
+</IfModule>
