@@ -1,3 +1,5 @@
+#Name: Odin App MVC mod_rewrite
+#Path: /.htaccess
 <IfModule mod_rewrite.c>
 	RewriteEngine on
 	#Accounts for all files that already exist.
